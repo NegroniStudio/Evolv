@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>EvolvP</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -16,16 +16,21 @@
   font-family:system-ui,sans-serif;
 }
 
+html, body{
+  height:100%;
+  overflow:hidden; /* 🚫 NO SCROLL */
+}
+
 body{
   background:#f4f6f8;
-  padding-bottom:110px;
 }
 
 /* ---------- TOP BAR ---------- */
 .top-bar{
+  height:150px;
   background:linear-gradient(135deg,#4CAF50,#66bb6a);
   color:white;
-  padding:18px 18px 14px;
+  padding:18px;
   border-radius:0 0 24px 24px;
   box-shadow:0 6px 20px rgba(0,0,0,0.2);
   position:relative;
@@ -39,12 +44,8 @@ body{
   cursor:pointer;
 }
 
-.top-row{
-  display:flex;
-  justify-content:center;
-}
-
 .app-name{
+  text-align:center;
   font-size:22px;
   font-weight:800;
 }
@@ -59,7 +60,7 @@ body{
 .stats{
   display:flex;
   justify-content:space-around;
-  margin-top:10px;
+  margin-top:14px;
 }
 
 .stat{
@@ -71,22 +72,28 @@ body{
 .stat i{
   display:block;
   font-size:28px;
-  margin-bottom:2px;
 }
 
-/* ---------- MAIN ---------- */
+/* ---------- MAIN (FIXED) ---------- */
 .main{
-  padding:12px 16px 0; /* 👈 menos padding arriba */
+  height:calc(100% - 150px - 84px); /* top-bar + bottom-bar */
   display:flex;
+  align-items:center;
   justify-content:center;
 }
 
-canvas{
-  max-width:320px;
-  margin-top:-10px; /* 👈 sube el gráfico */
+/* ---------- CHART FIX ---------- */
+.chart-wrapper{
+  width:300px;
+  height:300px;
 }
 
-/* ---------- SIDEBAR CONFIG ---------- */
+canvas{
+  width:300px !important;
+  height:300px !important;
+}
+
+/* ---------- SIDEBAR ---------- */
 .sidebar{
   position:fixed;
   top:0;
@@ -96,7 +103,7 @@ canvas{
   background:white;
   box-shadow:4px 0 20px rgba(0,0,0,.2);
   padding:20px;
-  transition:.3s;
+  transition:.25s ease;
   z-index:20;
 }
 
@@ -160,32 +167,27 @@ canvas{
 
 /* ---------- BOTTOM BAR ---------- */
 .bottom-bar{
+  height:84px;
   position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
+  bottom:0;
+  left:0;
+  right:0;
   background:rgba(255,255,255,0.95);
   backdrop-filter:blur(10px);
-  width:calc(100% - 32px);
-  max-width:560px;
-  height:64px;
-  border-radius:26px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.15);
   display:flex;
   justify-content:space-around;
   align-items:center;
+  box-shadow:0 -6px 20px rgba(0,0,0,0.15);
 }
 
 .bottom-bar a{
   color:#888;
   font-size:22px;
   text-decoration:none;
-  transition:.2s;
 }
 
 .bottom-bar a.active{
   color:#4CAF50;
-  transform:scale(1.15);
 }
 </style>
 </head>
@@ -198,9 +200,7 @@ canvas{
     <h3>Configurar gráfico</h3>
     <i class="fas fa-times close-btn" onclick="toggleSidebar()"></i>
   </div>
-
   <div id="axisList"></div>
-
   <div class="add-axis">
     <input id="newAxis" placeholder="Nueva característica">
     <button onclick="addAxis()">+</button>
@@ -210,28 +210,20 @@ canvas{
 <!-- TOP BAR -->
 <div class="top-bar">
   <i class="fas fa-bars menu-btn" onclick="toggleSidebar()"></i>
-
-  <div class="top-row">
-    <div class="app-name">EvolvP</div>
-  </div>
-
+  <div class="app-name">EvolvP</div>
   <div class="date" id="date"></div>
 
   <div class="stats">
-    <div class="stat">
-      <i class="fas fa-fire"></i>
-      7
-    </div>
-    <div class="stat">
-      <i class="fas fa-chart-line"></i>
-      21
-    </div>
+    <div class="stat"><i class="fas fa-fire"></i>7</div>
+    <div class="stat"><i class="fas fa-chart-line"></i>21</div>
   </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
-  <canvas id="habitChart"></canvas>
+  <div class="chart-wrapper">
+    <canvas id="habitChart" width="300" height="300"></canvas>
+  </div>
 </div>
 
 <!-- BOTTOM BAR -->
@@ -249,10 +241,10 @@ document.getElementById("date").innerText =
   new Date().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"short"});
 
 function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("active");
+  sidebar.classList.toggle("active");
 }
 
-/* ---- Radar center dot ---- */
+/* ---- CENTER DOT ---- */
 const centerDot={
   id:'centerDot',
   afterDraw(chart){
@@ -268,6 +260,7 @@ const centerDot={
 let axes=["Salud","Ejercicio","Estudio","Sueño","Disciplina","Social"];
 let values=axes.map(()=>3);
 
+/* ---- FIXED RADAR ---- */
 const chart=new Chart(habitChart,{
   type:'radar',
   plugins:[centerDot],
@@ -281,11 +274,14 @@ const chart=new Chart(habitChart,{
     }]
   },
   options:{
+    responsive:false,      // 🚫 NO resize
+    animation:false,       // 🚫 NO animation
     plugins:{legend:{display:false}},
-    scales:{r:{suggestedMin:0,suggestedMax:5}}
+    scales:{r:{min:0,max:5}}
   }
 });
 
+/* ---- CONFIG ---- */
 function renderAxes(){
   axisList.innerHTML="";
   axes.forEach((a,i)=>{
