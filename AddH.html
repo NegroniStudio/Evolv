@@ -102,8 +102,8 @@ button{
   font-size:16px;
   cursor:pointer;
 }
-.confirm{background:#4CAF50;color:white;width:100%;}
-.cancel{background:#ccc;width:100%; margin-top:10px;}
+.confirm{background:#4CAF50;color:white;width:100%; margin-bottom:10px;}
+.cancel{background:#ccc;width:100%;}
 
 /* ADD BUTTON */
 .add-btn{
@@ -173,7 +173,6 @@ button{
 
   <label>Categoría</label>
   <select id="habitCat">
-    <option value="">-- Elige una categoría --</option>
     <option>Salud</option>
     <option>Ejercicio</option>
     <option>Estudio</option>
@@ -219,7 +218,6 @@ button{
 <script>
 let habits=[];
 
-/* ---- RANGE LOGIC ---- */
 document.querySelectorAll("input[name=range]").forEach(r=>{
   r.onchange=()=>{
     startDate.style.display = (r.value==="between"||r.value==="from")?"block":"none";
@@ -230,21 +228,14 @@ document.querySelectorAll("input[name=range]").forEach(r=>{
 function openCreate(){createPanel.classList.add("active");}
 function closePanels(){createPanel.classList.remove("active");}
 
-/* ---- CREATE ---- */
 function createHabit(){
   if(!habitName.value||!habitCat.value) return alert("Completa todo");
-  habits.push({
-    name:habitName.value,
-    cat:habitCat.value,
-    status:"Activo"
-  });
-  habitName.value="";
-  habitCat.value="";
+  habits.push({name:habitName.value,cat:habitCat.value,status:"Activo"});
+  habitName.value=""; habitCat.value="";
   closePanels();
   render();
 }
 
-/* ---- RENDER ---- */
 function render(){
   habitList.innerHTML="";
   habits.forEach((h,i)=>{
@@ -253,10 +244,7 @@ function render(){
         <strong>${h.name}</strong><br>
         <small>${h.cat} · ${h.status}</small>
         <div class="actions">
-          ${h.status==="Activo"
-            ? `<button class="pause" onclick="pauseHabit(${i})">Pausar</button>`
-            : `<button class="confirm" onclick="resumeHabit(${i})">Reanudar</button>`
-          }
+          ${h.status==="Activo"?`<button class="pause" onclick="pauseHabit(${i})">Pausar</button>`:`<button class="confirm" onclick="resumeHabit(${i})">Reanudar</button>`}
           <button class="edit">Editar</button>
           <button class="delete" onclick="deleteHabit(${i})">Eliminar</button>
         </div>
@@ -264,9 +252,7 @@ function render(){
   });
 }
 
-function pauseHabit(i){
-  if(confirm("¿Seguro que querés pausar este hábito?")){habits[i].status="Pausado";render();}
-}
+function pauseHabit(i){if(confirm("¿Seguro que querés pausar este hábito?")){habits[i].status="Pausado";render();}}
 function resumeHabit(i){habits[i].status="Activo";render();}
 function deleteHabit(i){if(confirm("¿Seguro que querés eliminar este hábito?")){habits.splice(i,1);render();}}
 </script>
