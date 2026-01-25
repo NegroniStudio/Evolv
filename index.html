@@ -25,7 +25,7 @@ body{
 .top-bar{
   background:linear-gradient(135deg,#4CAF50,#66bb6a);
   color:white;
-  padding:18px;
+  padding:18px 18px 14px;
   border-radius:0 0 24px 24px;
   box-shadow:0 6px 20px rgba(0,0,0,0.2);
   position:relative;
@@ -59,30 +59,31 @@ body{
 .stats{
   display:flex;
   justify-content:space-around;
-  margin-top:14px;
+  margin-top:10px;
 }
 
 .stat{
   text-align:center;
-  font-size:22px;
+  font-size:24px;
   font-weight:700;
 }
 
 .stat i{
   display:block;
-  font-size:26px;
-  margin-bottom:4px;
+  font-size:28px;
+  margin-bottom:2px;
 }
 
 /* ---------- MAIN ---------- */
 .main{
-  padding:24px 16px;
+  padding:12px 16px 0; /* 👈 menos padding arriba */
   display:flex;
   justify-content:center;
 }
 
 canvas{
   max-width:320px;
+  margin-top:-10px; /* 👈 sube el gráfico */
 }
 
 /* ---------- SIDEBAR CONFIG ---------- */
@@ -103,8 +104,16 @@ canvas{
   left:0;
 }
 
-.sidebar h3{
+.sidebar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
   margin-bottom:16px;
+}
+
+.close-btn{
+  font-size:22px;
+  cursor:pointer;
 }
 
 .axis-item{
@@ -185,8 +194,13 @@ canvas{
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-  <h3>Configurar gráfico</h3>
+  <div class="sidebar-header">
+    <h3>Configurar gráfico</h3>
+    <i class="fas fa-times close-btn" onclick="toggleSidebar()"></i>
+  </div>
+
   <div id="axisList"></div>
+
   <div class="add-axis">
     <input id="newAxis" placeholder="Nueva característica">
     <button onclick="addAxis()">+</button>
@@ -238,15 +252,15 @@ function toggleSidebar(){
   document.getElementById("sidebar").classList.toggle("active");
 }
 
-/* ---- Radar center dot plugin ---- */
-const centerDot = {
+/* ---- Radar center dot ---- */
+const centerDot={
   id:'centerDot',
   afterDraw(chart){
-    const ctx = chart.ctx;
-    const center = chart.scales.r.getPointPosition(0,0);
+    const ctx=chart.ctx;
+    const p=chart.scales.r.getPointPosition(0,0);
     ctx.beginPath();
-    ctx.arc(center.x, center.y, 4, 0, Math.PI*2);
-    ctx.fillStyle = '#4CAF50';
+    ctx.arc(p.x,p.y,4,0,Math.PI*2);
+    ctx.fillStyle='#4CAF50';
     ctx.fill();
   }
 };
@@ -254,7 +268,7 @@ const centerDot = {
 let axes=["Salud","Ejercicio","Estudio","Sueño","Disciplina","Social"];
 let values=axes.map(()=>3);
 
-const chart = new Chart(habitChart,{
+const chart=new Chart(habitChart,{
   type:'radar',
   plugins:[centerDot],
   data:{
@@ -290,9 +304,8 @@ function editAxis(i,v){
 }
 
 function addAxis(){
-  const v=newAxis.value;
-  if(!v) return;
-  axes.push(v);
+  if(!newAxis.value) return;
+  axes.push(newAxis.value);
   values.push(3);
   newAxis.value="";
   chart.data.labels=axes;
