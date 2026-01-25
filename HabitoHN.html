@@ -26,68 +26,71 @@
         .top-bar {
             background: linear-gradient(135deg, #4CAF50, #66bb6a);
             color: white;
-            padding: 15px 15px 12px 15px;
-            border-radius: 0 0 24px 24px;
+            padding: 15px;
+            border-radius: 0 0 30px 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             z-index: 10;
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .top-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
         }
 
         .month-selector {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
             font-weight: 800;
-            font-size: 18px;
+            font-size: 20px;
         }
 
         .month-arrow {
-            font-size: 14px;
-            opacity: 0.7;
+            font-size: 16px;
+            opacity: 0.8;
             cursor: pointer;
-            padding: 5px;
+            padding: 8px;
             transition: 0.2s;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
         }
-        .month-arrow:hover { opacity: 1; }
+        .month-arrow:hover { opacity: 1; background: rgba(255,255,255,0.3); }
 
         /* ---------- WEEKLY SELECTOR ---------- */
         .week-container {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.12);
-            padding: 10px;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px;
+            border-radius: 20px;
+            width: 100%;
         }
 
         .nav-arrow {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            font-size: 12px;
+            border-radius: 12px;
+            font-size: 14px;
             cursor: pointer;
         }
 
         .days-row {
             display: flex;
             flex: 1;
-            justify-content: space-between;
-            overflow: hidden;
+            justify-content: space-around;
+            align-items: center;
         }
 
         .day-item {
@@ -96,47 +99,43 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            flex: 1;
-            min-width: 35px;
-            padding: 6px 0;
-            border-radius: 12px;
-            transition: 0.2s;
-            margin: 0 2px;
+            width: 14%;
+            padding: 8px 0;
+            border-radius: 14px;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .day-item span:first-child {
             font-size: 10px;
-            font-weight: bold;
-            opacity: 0.7;
+            font-weight: 700;
+            opacity: 0.8;
             text-transform: uppercase;
-            margin-bottom: 2px;
         }
 
         .day-item span:last-child {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 800;
         }
 
         .day-item.selected {
             background: white;
             color: #4CAF50;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            transform: scale(1.1);
         }
 
         .day-item.has-success::after {
             content: "";
-            width: 4px;
-            height: 4px;
+            width: 5px;
+            height: 5px;
             background: currentColor;
             border-radius: 50%;
-            margin-top: 2px;
+            margin-top: 3px;
         }
 
         /* ---------- MAIN CONTENT ---------- */
         .main-content {
-            /* Ajustado para nueva altura de bottom-bar (95px) */
-            height: calc(100% - 145px - 95px);
+            height: calc(100% - 165px - 95px);
             overflow-y: auto;
             padding: 20px;
             width: 100%;
@@ -146,19 +145,19 @@
 
         .progress-card {
             background: white;
-            padding: 16px;
-            border-radius: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            padding: 20px;
+            border-radius: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .circular-progress {
             position: relative;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: conic-gradient(#4CAF50 var(--p), #eee 0deg);
             display: flex;
@@ -168,33 +167,33 @@
         .circular-progress::before {
             content: "";
             position: absolute;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             background: white;
             border-radius: 50%;
         }
         .circular-progress span {
             position: relative;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 800;
             color: #4CAF50;
         }
 
         .habit-item {
             background: white;
-            padding: 14px 18px;
-            border-radius: 18px;
-            margin-bottom: 10px;
+            padding: 16px 20px;
+            border-radius: 20px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
 
         .check-circle {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
             border: 2px solid #e2e8f0;
             display: flex;
             align-items: center;
@@ -208,9 +207,9 @@
             color: white;
         }
 
-        /* ---------- BOTTOM BAR ELEVADA Y MÁS ALTA ---------- */
+        /* ---------- BOTTOM BAR ---------- */
         .bottom-bar{
-            height: 95px; /* Altura aumentada */
+            height: 95px;
             position: fixed;
             bottom: 0; 
             left: 0; 
@@ -219,31 +218,32 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            box-shadow: 0 -8px 25px rgba(0,0,0,0.08);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.08);
             max-width: 600px;
             margin: 0 auto;
-            border-radius: 28px 28px 0 0;
-            padding-bottom: 10px; /* Espacio para que no queden pegados al borde físico del cel */
+            border-radius: 30px 30px 0 0;
+            padding-bottom: 15px;
         }
         .bottom-bar a{ 
-            color: #ccc; 
-            font-size: 26px; /* Iconos más grandes */
-            width: 50px;
-            height: 50px;
+            color: #d1d5db; 
+            font-size: 28px;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
         .bottom-bar a.active{ 
             color: #4CAF50; 
-            transform: scale(1.1);
+            background: #f0fdf4;
+            border-radius: 18px;
+            transform: translateY(-5px);
         }
     </style>
 </head>
 <body>
 
-    <!-- TOP BAR COMPACTA -->
     <div class="top-bar">
         <div class="top-nav">
             <div class="month-selector">
@@ -251,36 +251,29 @@
                 <span id="monthText">Enero</span>
                 <i class="fas fa-chevron-right month-arrow" id="nextMonth"></i>
             </div>
-            <div class="text-xs font-bold opacity-70">EVOLVP</div>
+            <div class="text-xs font-black text-white opacity-60">EVOLVP</div>
         </div>
 
         <div class="week-container">
             <div class="nav-arrow" id="prevWeek"><i class="fas fa-chevron-left"></i></div>
-            <div class="days-row" id="daysRow">
-                <!-- Días de la semana -->
-            </div>
+            <div class="days-row" id="daysRow"></div>
             <div class="nav-arrow" id="nextWeek"><i class="fas fa-chevron-right"></i></div>
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <div class="main-content">
         <div class="progress-card">
             <div class="circular-progress" id="circProgress" style="--p: 0deg">
                 <span id="percText">0%</span>
             </div>
             <div>
-                <h3 class="font-extrabold text-slate-800" id="dateLabel">Hoy</h3>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="statusMsg">Objetivo 65%</p>
+                <h3 class="font-extrabold text-xl text-slate-800" id="dateLabel">Hoy</h3>
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest" id="statusMsg">Objetivo 65%</p>
             </div>
         </div>
-
-        <div id="habitList" class="pb-20">
-            <!-- La lista de hábitos se inyecta aquí -->
-        </div>
+        <div id="habitList" class="pb-10"></div>
     </div>
 
-    <!-- BARRA DE NAVEGACIÓN INFERIOR MEJORADA -->
     <div class="bottom-bar">
         <a href="index.html"><i class="fas fa-house"></i></a>
         <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
@@ -290,64 +283,69 @@
         <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // --- BASE DE DATOS LOCAL STORAGE ---
+        const DB_KEY = 'evolvp_habits';
 
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'evolvp-habits';
+        function getDB() {
+            const data = localStorage.getItem(DB_KEY);
+            return data ? JSON.parse(data) : { habits: [], logs: {} };
+        }
 
-        let user = null;
-        let habits = [];
-        let logs = {}; 
+        function saveDB(db) {
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+            render();
+        }
+
         let currentWeekStart = new Date(); 
-        
         function setWeekToMonday(date) {
             const day = date.getDay();
             const diff = date.getDate() - day + (day === 0 ? -6 : 1);
             date.setDate(diff);
             return date;
         }
-        
         setWeekToMonday(currentWeekStart);
+
         let selectedDate = new Date().toISOString().split('T')[0];
 
-        onAuthStateChanged(auth, (u) => {
-            if (u) { user = u; loadData(); }
-            else { 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) signInWithCustomToken(auth, __initial_auth_token);
-                else signInAnonymously(auth);
-            }
-        });
-
-        function loadData() {
-            onSnapshot(collection(db, 'artifacts', appId, 'users', user.uid, 'habits'), (snap) => {
-                habits = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                render();
-            });
-            onSnapshot(collection(db, 'artifacts', appId, 'users', user.uid, 'dailyLogs'), (snap) => {
-                logs = {}; snap.docs.forEach(d => logs[d.id] = d.data());
-                render();
-            });
-        }
-
-        window.toggleHabit = async (habitId) => {
-            const dayLog = logs[selectedDate] || {};
-            const newState = !dayLog[habitId];
-            await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'dailyLogs', selectedDate), { ...dayLog, [habitId]: newState }, { merge: true });
+        // --- ACCIONES ---
+        window.toggleHabit = (habitId) => {
+            const db = getDB();
+            if (!db.logs[selectedDate]) db.logs[selectedDate] = {};
+            
+            db.logs[selectedDate][habitId] = !db.logs[selectedDate][habitId];
+            saveDB(db);
         };
 
+        // --- NAVEGACIÓN ---
+        document.getElementById('prevWeek').onclick = () => {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            render();
+        };
+        document.getElementById('nextWeek').onclick = () => {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            render();
+        };
+        document.getElementById('prevMonth').onclick = () => {
+            currentWeekStart.setMonth(currentWeekStart.getMonth() - 1);
+            setWeekToMonday(currentWeekStart);
+            render();
+        };
+        document.getElementById('nextMonth').onclick = () => {
+            currentWeekStart.setMonth(currentWeekStart.getMonth() + 1);
+            setWeekToMonday(currentWeekStart);
+            render();
+        };
+
+        // --- RENDERIZADO ---
         function render() {
-            renderWeek();
-            renderHabits();
-            updateProgress();
+            const db = getDB();
+            renderWeek(db);
+            renderHabits(db);
+            updateProgress(db);
         }
 
-        function renderWeek() {
+        function renderWeek(db) {
             const daysRow = document.getElementById('daysRow');
             const monthText = document.getElementById('monthText');
             daysRow.innerHTML = '';
@@ -360,9 +358,9 @@
                 const dKey = d.toISOString().split('T')[0];
                 const isSelected = dKey === selectedDate;
 
-                const dayLog = logs[dKey] || {};
-                const doneCount = habits.filter(h => dayLog[h.id]).length;
-                const perc = habits.length > 0 ? (doneCount/habits.length)*100 : 0;
+                const dayLog = db.logs[dKey] || {};
+                const doneCount = db.habits.filter(h => dayLog[h.id]).length;
+                const perc = db.habits.length > 0 ? (doneCount/db.habits.length)*100 : 0;
 
                 const dayItem = document.createElement('div');
                 dayItem.className = `day-item ${isSelected ? 'selected' : ''} ${perc >= 65 ? 'has-success' : ''}`;
@@ -375,44 +373,24 @@
             }
         }
 
-        document.getElementById('prevWeek').onclick = () => {
-            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-            renderWeek();
-        };
-        document.getElementById('nextWeek').onclick = () => {
-            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-            renderWeek();
-        };
-
-        document.getElementById('prevMonth').onclick = () => {
-            currentWeekStart.setMonth(currentWeekStart.getMonth() - 1);
-            setWeekToMonday(currentWeekStart);
-            renderWeek();
-        };
-        document.getElementById('nextMonth').onclick = () => {
-            currentWeekStart.setMonth(currentWeekStart.getMonth() + 1);
-            setWeekToMonday(currentWeekStart);
-            renderWeek();
-        };
-
-        function renderHabits() {
+        function renderHabits(db) {
             const list = document.getElementById('habitList');
-            const dayLog = logs[selectedDate] || {};
+            const dayLog = db.logs[selectedDate] || {};
             list.innerHTML = '';
 
-            if(habits.length === 0) {
-                list.innerHTML = `<p class="text-center text-slate-400 mt-10">Sin hábitos. Crea uno en el botón +</p>`;
+            if(db.habits.length === 0) {
+                list.innerHTML = `<div class="text-center py-10"><i class="fas fa-clipboard-list text-4xl text-slate-200 mb-3"></i><p class="text-slate-400 font-medium">No hay hábitos creados aún.</p></div>`;
                 return;
             }
 
-            habits.forEach(h => {
+            db.habits.forEach(h => {
                 const isDone = dayLog[h.id];
                 const item = document.createElement('div');
                 item.className = 'habit-item';
                 item.innerHTML = `
                     <div class="flex-1" onclick="toggleHabit('${h.id}')">
                         <p class="font-bold text-slate-700">${h.name}</p>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase">${h.cat || 'General'}</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">${h.cat || 'General'}</p>
                     </div>
                     <div class="check-circle ${isDone ? 'active' : ''}" onclick="toggleHabit('${h.id}')">
                         <i class="fas fa-check text-xs"></i>
@@ -425,11 +403,11 @@
             document.getElementById('dateLabel').innerText = dObj.toLocaleDateString('es-ES', { day:'numeric', month:'short' });
         }
 
-        function updateProgress() {
-            if(habits.length === 0) return;
-            const dayLog = logs[selectedDate] || {};
-            const done = habits.filter(h => dayLog[h.id]).length;
-            const perc = Math.round((done / habits.length) * 100);
+        function updateProgress(db) {
+            if(db.habits.length === 0) return;
+            const dayLog = db.logs[selectedDate] || {};
+            const done = db.habits.filter(h => dayLog[h.id]).length;
+            const perc = Math.round((done / db.habits.length) * 100);
 
             document.getElementById('percText').innerText = perc + '%';
             document.getElementById('circProgress').style.setProperty('--p', (perc * 3.6) + 'deg');
@@ -443,6 +421,9 @@
                 msg.style.color = "#94a3b8";
             }
         }
+
+        // Iniciar
+        render();
     </script>
 </body>
 </html>
