@@ -1,262 +1,214 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>EvolvP</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>EvolvP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: system-ui, sans-serif;
-}
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-body {
-  background: #f4f6f8;
-  height: 100vh;
-  overflow: hidden;
-}
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, sans-serif;
+    }
 
-/* ---------- TOP BAR ---------- */
-.top-bar {
-  background: white;
-  padding: 14px 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+    body {
+      background: #f4f6f8;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
 
-.top-bar .row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    /* ---------- TOP BAR ---------- */
+    .top-bar {
+      background: white;
+      padding: 14px 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
 
-.app-name {
-  font-weight: 700;
-  font-size: 18px;
-}
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.stats {
-  display: flex;
-  gap: 12px;
-  font-size: 14px;
-}
+    .app-name {
+      font-size: 20px;
+      font-weight: 700;
+    }
 
-/* ---------- MAIN ---------- */
-.main {
-  height: calc(100vh - 160px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
+    .date {
+      font-size: 14px;
+      color: #666;
+    }
 
-.main.active {
-  display: flex;
-}
+    .stats {
+      margin-top: 6px;
+      display: flex;
+      gap: 16px;
+      font-size: 14px;
+    }
 
-canvas {
-  max-width: 320px;
-}
+    /* ---------- MAIN ---------- */
+    .main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
 
-/* ---------- SUMMARY ---------- */
-.summary {
-  margin-top: 16px;
-  background: white;
-  padding: 14px 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  font-size: 14px;
-}
+    canvas {
+      max-width: 320px;
+      max-height: 320px;
+    }
 
-/* ---------- ADD HABIT ---------- */
-.add-habit {
-  width: 100%;
-  max-width: 360px;
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-}
+    .summary {
+      margin-top: 20px;
+      background: white;
+      padding: 16px 22px;
+      border-radius: 18px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      font-size: 14px;
+      text-align: center;
+    }
 
-.add-habit input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-}
+    /* ---------- BOTTOM BAR ---------- */
+    .bottom-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      width: calc(100% - 32px);
+      max-width: 520px;
+      height: 64px;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 10;
+    }
 
-.add-habit button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  background: #4CAF50;
-  color: white;
-  font-weight: 600;
-}
+    .bottom-bar a {
+      color: #888;
+      font-size: 22px;
+      text-decoration: none;
+      transition: 0.2s;
+    }
 
-/* ---------- CHECK HABITS ---------- */
-.check-zone {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  padding: 20px;
-}
-
-.habit-card {
-  min-width: 220px;
-  background: white;
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-  text-align: center;
-}
-
-.habit-card button {
-  margin-top: 12px;
-  padding: 10px;
-  width: 100%;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-}
-
-.done {
-  background: #4CAF50;
-  color: white;
-}
-
-.not-done {
-  background: #f44336;
-  color: white;
-}
-
-/* ---------- BOTTOM BAR ---------- */
-.bottom-bar {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(255,255,255,0.95);
-  width: calc(100% - 32px);
-  max-width: 420px;
-  height: 60px;
-  border-radius: 22px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-
-.bottom-bar i {
-  font-size: 22px;
-  color: #888;
-  cursor: pointer;
-}
-
-.bottom-bar i.active {
-  color: #4CAF50;
-  transform: scale(1.15);
-}
-</style>
+    .bottom-bar a.active {
+      color: #4CAF50;
+      transform: scale(1.15);
+    }
+  </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="top-bar">
-  <div class="row">
-    <div class="app-name">EvolvP</div>
-    <div id="date"></div>
-  </div>
-  <div class="stats">
-    🔥 Racha: <b>7 días</b>
-    📊 Total: <b>21 días</b>
-  </div>
-</div>
-
-<!-- INDEX -->
-<div id="home" class="main active">
-  <canvas id="habitChart"></canvas>
-  <div class="summary">
-    Estado general de tus hábitos hoy
-  </div>
-</div>
-
-<!-- CHECK HABITS -->
-<div id="check" class="main">
-  <div class="check-zone">
-    <div class="habit-card">
-      <h3>Ejercicio</h3>
-      <button class="done">Hecho</button>
-      <button class="not-done">No hecho</button>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-row">
+      <div class="app-name">EvolvP</div>
+      <div class="date" id="date"></div>
     </div>
-    <div class="habit-card">
-      <h3>Estudio</h3>
-      <button class="done">Hecho</button>
-      <button class="not-done">No hecho</button>
+    <div class="stats">
+      🔥 Racha: <b>7 días</b>
+      📊 Total: <b>21 días</b>
     </div>
   </div>
-</div>
 
-<!-- ADD HABIT -->
-<div id="add" class="main">
-  <div class="add-habit">
-    <h3>Nuevo hábito</h3><br>
-    <input type="text" placeholder="Nombre del hábito">
-    <button>Agregar</button>
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <canvas id="habitChart"></canvas>
+
+    <div class="summary">
+      Estado general de tus hábitos hoy
+    </div>
   </div>
-</div>
 
-<!-- BOTTOM BAR -->
-<div class="bottom-bar">
-  <i class="fas fa-house active" onclick="show('home', this)"></i>
-  <i class="fas fa-check" onclick="show('check', this)"></i>
-  <i class="fas fa-plus" onclick="show('add', this)"></i>
-  <i class="fas fa-gear"></i>
-</div>
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <a href="index.html" class="active" title="Inicio">
+      <i class="fas fa-house"></i>
+    </a>
 
-<script>
-document.getElementById("date").innerText =
-  new Date().toLocaleDateString("es-AR", {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'short'
-  });
+    <a href="Calendario.html" title="Calendario">
+      <i class="fas fa-calendar"></i>
+    </a>
 
-function show(id, el) {
-  document.querySelectorAll('.main').forEach(m => m.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+    <a href="Consejos.html" title="Consejos">
+      <i class="fas fa-lightbulb"></i>
+    </a>
 
-  document.querySelectorAll('.bottom-bar i').forEach(i => i.classList.remove('active'));
-  el.classList.add('active');
-}
+    <a href="Ajustes.html" title="Ajustes">
+      <i class="fas fa-gear"></i>
+    </a>
 
-const ctx = document.getElementById('habitChart');
-new Chart(ctx, {
-  type: 'radar',
-  data: {
-    labels: ['Salud','Ejercicio','Estudio','Sueño','Disciplina','Social'],
-    datasets: [{
-      data: [4,3,5,2,4,3],
-      backgroundColor: 'rgba(76,175,80,0.2)',
-      borderColor: '#4CAF50'
-    }]
-  },
-  options: {
-    plugins:{ legend:{display:false}},
-    scales:{ r:{ suggestedMin:0, suggestedMax:5}}
-  }
-});
-</script>
+    <a href="HabitoHN.html" title="Marcar hábito">
+      <i class="fas fa-check"></i>
+    </a>
+
+    <a href="AddH.html" title="Agregar hábito">
+      <i class="fas fa-plus"></i>
+    </a>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    // Fecha actual
+    document.getElementById("date").innerText =
+      new Date().toLocaleDateString("es-ES", {
+        weekday: "long",
+        day: "numeric",
+        month: "short"
+      });
+
+    // Gráfico de hábitos
+    const ctx = document.getElementById("habitChart");
+
+    new Chart(ctx, {
+      type: "radar",
+      data: {
+        labels: [
+          "Salud",
+          "Ejercicio",
+          "Estudio",
+          "Sueño",
+          "Disciplina",
+          "Social"
+        ],
+        datasets: [{
+          data: [4, 3, 5, 2, 4, 3],
+          fill: true,
+          backgroundColor: "rgba(76, 175, 80, 0.2)",
+          borderColor: "#4CAF50",
+          pointBackgroundColor: "#4CAF50"
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          r: {
+            suggestedMin: 0,
+            suggestedMax: 5,
+            ticks: { display: false },
+            grid: { color: "#ddd" }
+          }
+        }
+      }
+    });
+  </script>
 
 </body>
 </html>
