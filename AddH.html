@@ -1,1 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Agregar Hábitos | EvolvP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:system-ui,sans-serif;
+}
+
+html, body{
+  height:100%;
+  overflow:hidden;
+}
+
+body{
+  background:#f4f6f8;
+}
+
+/* ---------- TOP BAR ---------- */
+.top-bar{
+  height:100px;
+  background:linear-gradient(135deg,#4CAF50,#66bb6a);
+  color:white;
+  padding:20px;
+  border-radius:0 0 24px 24px;
+  text-align:center;
+  box-shadow:0 6px 20px rgba(0,0,0,.2);
+}
+
+.top-bar h1{
+  font-size:22px;
+}
+
+/* ---------- CONTENT ---------- */
+.content{
+  height:calc(100% - 100px - 84px);
+  overflow-y:auto;
+  padding:16px;
+}
+
+.section{
+  background:white;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 6px 16px rgba(0,0,0,.1);
+}
+
+.section h3{
+  margin-bottom:12px;
+}
+
+/* ---------- FORM ---------- */
+input, select{
+  width:100%;
+  padding:10px;
+  border-radius:12px;
+  border:1px solid #ccc;
+  margin-bottom:10px;
+}
+
+.option{
+  margin-bottom:6px;
+}
+
+button{
+  padding:10px 14px;
+  border:none;
+  border-radius:12px;
+  background:#4CAF50;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button.secondary{
+  background:#444;
+}
+
+button.danger{
+  background:#f44336;
+}
+
+/* ---------- HABIT LIST ---------- */
+.habit{
+  border-bottom:1px solid #eee;
+  padding:10px 0;
+}
+
+.habit:last-child{
+  border:none;
+}
+
+.habit strong{
+  display:block;
+}
+
+.actions{
+  margin-top:6px;
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+/* ---------- BOTTOM BAR ---------- */
+.bottom-bar{
+  height:84px;
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(10px);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  box-shadow:0 -6px 20px rgba(0,0,0,.15);
+}
+
+.bottom-bar a{
+  color:#888;
+  font-size:22px;
+  text-decoration:none;
+}
+
+.bottom-bar a.active{
+  color:#4CAF50;
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOP -->
+<div class="top-bar">
+  <h1>Agregar / Quitar Hábitos</h1>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- CREATE HABIT -->
+  <div class="section">
+    <h3>Nuevo hábito</h3>
+
+    <input id="habitName" placeholder="Nombre del hábito">
+
+    <select id="habitCategory">
+      <option value="">Categoría</option>
+      <option>Salud</option>
+      <option>Ejercicio</option>
+      <option>Estudio</option>
+      <option>Sueño</option>
+      <option>Disciplina</option>
+      <option>Social</option>
+    </select>
+
+    <div class="option">
+      <input type="radio" name="range" value="today+" checked> Desde hoy en adelante
+    </div>
+    <div class="option">
+      <input type="radio" name="range" value="today"> Solo por hoy
+    </div>
+    <div class="option">
+      <input type="radio" name="range" value="between"> De fecha a fecha
+    </div>
+    <div class="option">
+      <input type="radio" name="range" value="from"> Desde una fecha
+    </div>
+
+    <input type="date" id="startDate">
+    <input type="date" id="endDate">
+
+    <button onclick="addHabit()">Crear hábito</button>
+  </div>
+
+  <!-- HABIT LIST -->
+  <div class="section">
+    <h3>Hábitos</h3>
+    <div id="habitList"></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <a href="index.html"><i class="fas fa-house"></i></a>
+  <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
+  <a href="HabitoHN.html"><i class="fas fa-check"></i></a>
+  <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
+  <a href="AddH.html" class="active"><i class="fas fa-plus"></i></a>
+  <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
+</div>
+
+<script>
+let habits = [];
+
+function addHabit(){
+  const name = habitName.value;
+  const cat = habitCategory.value;
+  if(!name || !cat) return alert("Completa nombre y categoría");
+
+  habits.push({
+    name,
+    cat,
+    status:"Activo"
+  });
+
+  habitName.value="";
+  renderHabits();
+}
+
+function renderHabits(){
+  habitList.innerHTML="";
+  habits.forEach((h,i)=>{
+    habitList.innerHTML += `
+      <div class="habit">
+        <strong>${h.name}</strong>
+        <small>${h.cat} · ${h.status}</small>
+        <div class="actions">
+          <button class="secondary" onclick="pauseHabit(${i})">Pausar</button>
+          <button class="danger" onclick="deleteHabit(${i})">Eliminar</button>
+        </div>
+      </div>`;
+  });
+}
+
+function pauseHabit(i){
+  const opt = prompt(
+`Pausar hábito:
+1 - Solo hoy
+2 - Día específico
+3 - De fecha a fecha`
+  );
+  if(opt) habits[i].status="Pausado";
+  renderHabits();
+}
+
+function deleteHabit(i){
+  const confirmDelete = confirm("¿Eliminar este hábito?");
+  if(confirmDelete){
+    habits.splice(i,1);
+    renderHabits();
+  }
+}
+</script>
+
+</body>
+</html>
 
