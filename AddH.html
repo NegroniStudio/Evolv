@@ -30,35 +30,37 @@ body{background:#f4f6f8;}
   padding:16px;
 }
 
-/* PANEL */
+/* PANEL COMPACTO */
 .panel{
   position:fixed;
   bottom:-100%;
   left:0; right:0;
+  max-height:70%;
   background:white;
   border-radius:24px 24px 0 0;
-  padding:24px;
+  padding:20px;
   transition:.3s;
   z-index:20;
+  display:flex;
+  flex-direction:column;
+  overflow-y:auto;
 }
 .panel.active{bottom:0;}
 .panel-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:20px;
+  margin-bottom:16px;
 }
 .panel-header h3{font-size:20px;}
 .panel-header i{font-size:22px; cursor:pointer;}
 
 /* FORM ELEMENTS */
 input, select{
-  width:100%;
-  padding:14px;
+  padding:10px;
   border-radius:12px;
   border:1px solid #ccc;
-  margin-bottom:16px;
-  font-size:16px;
+  font-size:15px;
 }
 
 label{
@@ -70,39 +72,38 @@ label{
 .options{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:10px;
   margin-bottom:16px;
 }
 
 .option-card{
   border:1px solid #ddd;
   border-radius:14px;
-  padding:12px 16px;
+  padding:10px 14px;
   display:flex;
   align-items:center;
+  justify-content:space-between;
   gap:10px;
   cursor:pointer;
   transition:0.2s;
 }
 .option-card:hover{background:#f0f0f0;}
 
-.date-inputs{
-  margin-top:10px;
+.option-inputs{
   display:flex;
-  gap:10px;
+  gap:8px;
 }
-.date-inputs input{flex:1;}
 
 /* BUTTONS */
 button{
-  padding:14px 20px;
+  padding:12px 18px;
   border:none;
   border-radius:12px;
   font-weight:600;
   font-size:16px;
   cursor:pointer;
 }
-.confirm{background:#4CAF50;color:white;width:100%; margin-bottom:10px;}
+.confirm{background:#4CAF50;color:white;width:100%; margin-bottom:8px;}
 .cancel{background:#ccc;width:100%;}
 
 /* ADD BUTTON */
@@ -110,11 +111,11 @@ button{
   position:fixed;
   right:20px;
   bottom:110px;
-  width:56px;height:56px;
+  width:50px;height:50px;
   border-radius:50%;
   background:#4CAF50;
   color:white;
-  font-size:26px;
+  font-size:24px;
   display:flex;align-items:center;justify-content:center;
 }
 
@@ -161,7 +162,7 @@ button{
   <i class="fas fa-plus"></i>
 </div>
 
-<!-- CREATE PANEL -->
+<!-- PANEL NUEVO HÁBITO -->
 <div class="panel" id="createPanel">
   <div class="panel-header">
     <h3>Nuevo hábito</h3>
@@ -184,22 +185,24 @@ button{
   <p><b>Desde qué fecha empieza este hábito:</b></p>
   <div class="options">
     <div class="option-card">
-      <input type="radio" name="range" value="today+" checked> Desde hoy en adelante
+      <span><input type="radio" name="range" value="today+" checked> Desde hoy en adelante</span>
     </div>
     <div class="option-card">
-      <input type="radio" name="range" value="today"> Solo por hoy
+      <span><input type="radio" name="range" value="today"> Solo por hoy</span>
     </div>
     <div class="option-card">
-      <input type="radio" name="range" value="between"> Desde una fecha hasta otra
+      <span><input type="radio" name="range" value="between"> Desde una fecha hasta otra</span>
+      <div class="option-inputs" style="display:none;">
+        <input type="date" id="startDate">
+        <input type="date" id="endDate">
+      </div>
     </div>
     <div class="option-card">
-      <input type="radio" name="range" value="from"> Desde una fecha en adelante
+      <span><input type="radio" name="range" value="from"> Desde una fecha en adelante</span>
+      <div class="option-inputs" style="display:none;">
+        <input type="date" id="fromDate">
+      </div>
     </div>
-  </div>
-
-  <div class="date-inputs">
-    <input type="date" id="startDate" style="display:none;">
-    <input type="date" id="endDate" style="display:none;">
   </div>
 
   <button class="confirm" onclick="createHabit()">Crear hábito</button>
@@ -218,10 +221,17 @@ button{
 <script>
 let habits=[];
 
+const startDateDiv = document.querySelector("#startDate").parentNode;
+const endDateDiv = document.querySelector("#endDate") ? document.querySelector("#endDate").parentNode : null;
+const fromDateDiv = document.querySelector("#fromDate").parentNode;
+
 document.querySelectorAll("input[name=range]").forEach(r=>{
   r.onchange=()=>{
-    startDate.style.display = (r.value==="between"||r.value==="from")?"block":"none";
-    endDate.style.display = (r.value==="between")?"block":"none";
+    // ocultar todos
+    document.querySelectorAll(".option-inputs").forEach(d=>d.style.display="none");
+    // mostrar solo el correspondiente
+    if(r.value==="between") r.closest(".option-card").querySelector(".option-inputs").style.display="flex";
+    if(r.value==="from") r.closest(".option-card").querySelector(".option-inputs").style.display="flex";
   }
 });
 
@@ -229,14 +239,17 @@ function openCreate(){createPanel.classList.add("active");}
 function closePanels(){createPanel.classList.remove("active");}
 
 function createHabit(){
-  if(!habitName.value||!habitCat.value) return alert("Completa todo");
-  habits.push({name:habitName.value,cat:habitCat.value,status:"Activo"});
-  habitName.value=""; habitCat.value="";
-  closePanels();
+  const name = document.getElementById("habitName").value;
+  const cat = document.getElementById("habitCat").value;
+  if(!name || !cat){ alert("Completa todo"); return;}
+  habits.push({name:name, cat:cat, status:"Activo"});
+  document.getElementById("habitName").value="";
+  createPanel.classList.remove("active");
   render();
 }
 
 function render(){
+  const habitList = document.getElementById("habitList");
   habitList.innerHTML="";
   habits.forEach((h,i)=>{
     habitList.innerHTML+=`
