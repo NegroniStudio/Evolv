@@ -4,27 +4,13 @@
 <meta charset="UTF-8">
 <title>Hábitos | EvolvP</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:system-ui,sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;}
+html,body{height:100%;overflow:hidden;}
+body{background:#f4f6f8;}
 
-html, body{
-  height:100%;
-  overflow:hidden;
-}
-
-body{
-  background:#f4f6f8;
-}
-
-/* TOP */
 .top-bar{
   height:110px;
   background:linear-gradient(135deg,#4CAF50,#66bb6a);
@@ -32,25 +18,15 @@ body{
   padding:24px;
   border-radius:0 0 24px 24px;
 }
+.top-bar h1{font-size:22px;}
+.top-bar p{font-size:14px;opacity:.9;margin-top:4px;}
 
-.top-bar h1{
-  font-size:22px;
-}
-
-.top-bar p{
-  opacity:.9;
-  font-size:14px;
-  margin-top:4px;
-}
-
-/* CONTENT */
 .content{
   height:calc(100% - 110px - 84px);
   overflow-y:auto;
   padding:16px;
 }
 
-/* HABIT CARD */
 .habit-card{
   background:white;
   border-radius:18px;
@@ -58,74 +34,53 @@ body{
   margin-bottom:12px;
   box-shadow:0 6px 16px rgba(0,0,0,.1);
 }
-
-.habit-card small{
-  color:#666;
-}
-
-.habit-actions{
-  margin-top:10px;
-  display:flex;
-  gap:8px;
-}
+.habit-card small{color:#666;}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
 
 button{
   border:none;
   border-radius:12px;
   padding:10px 14px;
   font-weight:600;
-  cursor:pointer;
 }
+.edit{background:#2196F3;color:white;}
+.pause{background:#444;color:white;}
+.delete{background:#f44336;color:white;}
+.confirm{background:#4CAF50;color:white;width:100%;}
+.cancel{background:#ccc;width:100%;}
 
-.pause{
-  background:#444;
-  color:white;
-}
-
-.delete{
-  background:#f44336;
-  color:white;
-}
-
-/* ADD BUTTON */
 .add-btn{
   position:fixed;
   right:20px;
   bottom:110px;
-  width:56px;
-  height:56px;
+  width:56px;height:56px;
   border-radius:50%;
   background:#4CAF50;
   color:white;
   font-size:26px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 10px 25px rgba(0,0,0,.3);
+  display:flex;align-items:center;justify-content:center;
 }
 
-/* PANEL */
 .panel{
   position:fixed;
   bottom:-100%;
-  left:0;
-  right:0;
+  left:0;right:0;
   background:white;
   border-radius:24px 24px 0 0;
   padding:20px;
-  transition:.3s ease;
+  transition:.3s;
   z-index:20;
 }
+.panel.active{bottom:0;}
 
-.panel.active{
-  bottom:0;
+.panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
 }
 
-.panel h3{
-  margin-bottom:12px;
-}
-
-input, select{
+input,select{
   width:100%;
   padding:10px;
   border-radius:12px;
@@ -133,35 +88,20 @@ input, select{
   margin-bottom:10px;
 }
 
-.confirm{
-  background:#4CAF50;
-  color:white;
-  width:100%;
-}
+.option{margin-bottom:6px;}
 
-/* BOTTOM BAR */
 .bottom-bar{
   height:84px;
   position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
+  bottom:0;left:0;right:0;
   background:rgba(255,255,255,.95);
-  backdrop-filter:blur(10px);
   display:flex;
   justify-content:space-around;
   align-items:center;
   box-shadow:0 -6px 20px rgba(0,0,0,.15);
 }
-
-.bottom-bar a{
-  color:#888;
-  font-size:22px;
-}
-
-.bottom-bar a.active{
-  color:#4CAF50;
-}
+.bottom-bar a{font-size:22px;color:#888;}
+.bottom-bar a.active{color:#4CAF50;}
 </style>
 </head>
 
@@ -169,21 +109,27 @@ input, select{
 
 <div class="top-bar">
   <h1>Hábitos</h1>
-  <p>Agregar, pausar o eliminar</p>
+  <p>Crear, editar, pausar o eliminar</p>
 </div>
 
 <div class="content" id="habitList"></div>
 
-<div class="add-btn" onclick="openPanel()">
+<div class="add-btn" onclick="openCreate()">
   <i class="fas fa-plus"></i>
 </div>
 
 <!-- CREATE PANEL -->
-<div class="panel" id="panel">
-  <h3>Nuevo hábito</h3>
-  <input id="name" placeholder="Nombre del hábito">
-  <select id="cat">
-    <option value="">Categoría</option>
+<div class="panel" id="createPanel">
+  <div class="panel-header">
+    <h3>Nuevo hábito</h3>
+    <i class="fas fa-times" onclick="closePanels()"></i>
+  </div>
+
+  <input id="habitName" placeholder="Nombre del hábito">
+
+  <label>Categoría</label>
+  <select id="habitCat">
+    <option value="">Seleccionar categoría</option>
     <option>Salud</option>
     <option>Ejercicio</option>
     <option>Estudio</option>
@@ -191,6 +137,17 @@ input, select{
     <option>Disciplina</option>
     <option>Social</option>
   </select>
+
+  <p><b>¿Desde qué fecha querés que empiece a regir este hábito?</b></p>
+
+  <div class="option"><input type="radio" name="range" value="today+" checked> Desde hoy en adelante</div>
+  <div class="option"><input type="radio" name="range" value="today"> Solo por hoy</div>
+  <div class="option"><input type="radio" name="range" value="between"> Desde una fecha hasta otra</div>
+  <div class="option"><input type="radio" name="range" value="from"> Desde una fecha en adelante</div>
+
+  <input type="date" id="startDate" style="display:none;">
+  <input type="date" id="endDate" style="display:none;">
+
   <button class="confirm" onclick="createHabit()">Crear hábito</button>
 </div>
 
@@ -206,36 +163,68 @@ input, select{
 <script>
 let habits=[];
 
-function openPanel(){
-  panel.classList.add("active");
-}
+/* ---- RANGE LOGIC ---- */
+document.querySelectorAll("input[name=range]").forEach(r=>{
+  r.onchange=()=>{
+    startDate.style.display = (r.value==="between"||r.value==="from")?"block":"none";
+    endDate.style.display = (r.value==="between")?"block":"none";
+  }
+});
 
-function closePanel(){
-  panel.classList.remove("active");
-}
+/* ---- PANELS ---- */
+function openCreate(){createPanel.classList.add("active");}
+function closePanels(){createPanel.classList.remove("active");}
 
+/* ---- CREATE ---- */
 function createHabit(){
-  if(!name.value || !cat.value) return;
-  habits.push({name:name.value,cat:cat.value});
-  name.value="";
-  cat.value="";
-  closePanel();
+  if(!habitName.value||!habitCat.value) return alert("Completa nombre y categoría");
+  habits.push({
+    name:habitName.value,
+    cat:habitCat.value,
+    status:"Activo"
+  });
+  habitName.value="";
+  habitCat.value="";
+  closePanels();
   render();
 }
 
+/* ---- RENDER ---- */
 function render(){
   habitList.innerHTML="";
-  habits.forEach(h=>{
+  habits.forEach((h,i)=>{
     habitList.innerHTML+=`
       <div class="habit-card">
         <strong>${h.name}</strong><br>
-        <small>${h.cat}</small>
-        <div class="habit-actions">
-          <button class="pause">Pausar</button>
-          <button class="delete">Eliminar</button>
+        <small>${h.cat} · ${h.status}</small>
+        <div class="actions">
+          ${h.status==="Activo"
+            ? `<button class="pause" onclick="pauseHabit(${i})">Pausar</button>`
+            : `<button class="confirm" onclick="resumeHabit(${i})">Reanudar</button>`
+          }
+          <button class="edit">Editar</button>
+          <button class="delete" onclick="deleteHabit(${i})">Eliminar</button>
         </div>
       </div>`;
   });
+}
+
+/* ---- PAUSE / RESUME / DELETE (base) ---- */
+function pauseHabit(i){
+  if(confirm("¿Seguro que querés pausar este hábito?")){
+    habits[i].status="Pausado";
+    render();
+  }
+}
+function resumeHabit(i){
+  habits[i].status="Activo";
+  render();
+}
+function deleteHabit(i){
+  if(confirm("¿Seguro que querés eliminar este hábito?")){
+    habits.splice(i,1);
+    render();
+  }
 }
 </script>
 
