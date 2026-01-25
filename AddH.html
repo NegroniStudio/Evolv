@@ -1,274 +1,492 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Hábitos | EvolvP</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <meta charset="UTF-8">
+    <title>Hábitos | EvolvP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;}
-html,body{height:100%;overflow:hidden;}
-body{background:#f4f6f8;}
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --bg: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --slate: #475569;
+        }
 
-/* TOP BAR */
-.top-bar{
-  height:110px;
-  background:linear-gradient(135deg,#4CAF50,#66bb6a);
-  color:white;
-  padding:24px;
-  border-radius:0 0 24px 24px;
-  display:flex; flex-direction:column; justify-content:center;
-}
-.top-bar h1{font-size:22px;}
-.top-bar p{font-size:14px;opacity:.9;margin-top:4px;}
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-/* CONTENT */
-.content{
-  height:calc(100% - 110px - 84px);
-  overflow-y:auto;
-  padding:16px;
-}
+        .top-bar {
+            background: linear-gradient(135deg, var(--primary), #66bb6a);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 0 0 30px 30px;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .top-bar h1 { font-size: 26px; font-weight: 800; }
 
-/* PANEL COMPACTO */
-.panel{
-  position:fixed;
-  bottom:-100%;
-  left:0; right:0;
-  max-height:70%;
-  background:white;
-  border-radius:24px 24px 0 0;
-  padding:20px;
-  transition:.3s;
-  z-index:20;
-  display:flex;
-  flex-direction:column;
-  overflow-y:auto;
-}
-.panel.active{bottom:0;}
-.panel-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:16px;
-}
-.panel-header h3{font-size:20px;}
-.panel-header i{font-size:22px; cursor:pointer;}
+        .content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 110px;
+        }
 
-/* FORM ELEMENTS */
-input, select{
-  padding:10px;
-  border-radius:12px;
-  border:1px solid #ccc;
-  font-size:15px;
-}
+        /* TARJETA DE HÁBITO */
+        .habit-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-label{
-  font-weight:600;
-  margin-bottom:6px;
-  display:block;
-}
+        .habit-info h3 { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
+        
+        .meta-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        
+        .badge {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+        .badge-cat { background: #f1f5f9; color: var(--slate); }
+        .badge-activo { background: #dcfce7; color: var(--primary); }
+        .badge-pausado { background: #fef3c7; color: var(--warning); }
+        .badge-preeliminacion { background: #fee2e2; color: var(--danger); }
 
-.options{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-bottom:16px;
-}
+        .date-info { font-size: 12px; color: var(--text-muted); margin-top: 5px; display: block; line-height: 1.4; }
 
-.option-card{
-  border:1px solid #ddd;
-  border-radius:14px;
-  padding:10px 14px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  cursor:pointer;
-  transition:0.2s;
-}
-.option-card:hover{background:#f0f0f0;}
+        /* BOTONES DE LA TARJETA */
+        .button-grid {
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 15px;
+        }
 
-.option-inputs{
-  display:flex;
-  gap:8px;
-}
+        .btn {
+            height: 46px;
+            border: none;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
 
-/* BUTTONS */
-button{
-  padding:12px 18px;
-  border:none;
-  border-radius:12px;
-  font-weight:600;
-  font-size:16px;
-  cursor:pointer;
-}
-.confirm{background:#4CAF50;color:white;width:100%; margin-bottom:8px;}
-.cancel{background:#ccc;width:100%;}
+        .btn-main { flex: 1; background: #f1f5f9; color: var(--text-main); }
+        .btn-resume { flex: 1; background: var(--primary); color: white; }
+        .btn-undo { flex: 1; background: var(--slate); color: white; }
+        .btn-delete { width: 46px; background: #fff1f2; color: var(--danger); border: 1px solid #fecaca; }
 
-/* ADD BUTTON */
-.add-btn{
-  position:fixed;
-  right:20px;
-  bottom:110px;
-  width:50px;height:50px;
-  border-radius:50%;
-  background:#4CAF50;
-  color:white;
-  font-size:24px;
-  display:flex;align-items:center;justify-content:center;
-}
+        .btn:active { transform: scale(0.96); }
 
-/* BOTTOM BAR */
-.bottom-bar{
-  height:84px;
-  position:fixed;
-  bottom:0;left:0;right:0;
-  background:rgba(255,255,255,.95);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  box-shadow:0 -6px 20px rgba(0,0,0,.15);
-}
-.bottom-bar a{font-size:22px;color:#888;}
-.bottom-bar a.active{color:#4CAF50;}
+        /* PANELES Y OVERLAY */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+        .overlay.active { display: block; }
 
-/* HABIT CARD */
-.habit-card{
-  background:white;
-  border-radius:18px;
-  padding:14px;
-  margin-bottom:12px;
-  box-shadow:0 6px 16px rgba(0,0,0,.1);
-}
-.habit-card small{color:#666;}
-.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
-.edit{background:#2196F3;color:white;}
-.pause{background:#444;color:white;}
-.delete{background:#f44336;color:white;}
-</style>
+        .panel {
+            position: fixed;
+            bottom: -100%;
+            left: 0; right: 0;
+            background: white;
+            border-radius: 32px 32px 0 0;
+            padding: 30px 24px;
+            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            z-index: 101;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .panel.active { bottom: 0; }
+
+        .panel h3 { text-align: center; margin-bottom: 25px; color: var(--slate); font-size: 20px; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 10px; color: var(--slate); }
+        
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border-radius: 14px;
+            border: 2px solid #f1f5f9;
+            background: #f8fafc;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* DISEÑO DE OPCIONES DE RADIO */
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8fafc;
+            border: 2px solid #f1f5f9;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .option-item input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .option-item span {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+            flex: 1;
+        }
+
+        .sub-input {
+            margin: -5px 0 15px 0;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 0 0 16px 16px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sub-input.visible { display: flex; }
+
+        .btn-confirm {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            border: none;
+            font-size: 16px;
+            font-weight: 800;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .btn-confirm.danger { background: var(--danger); }
+
+        .add-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 100px;
+            width: 64px; height: 64px;
+            border-radius: 22px;
+            background: var(--primary);
+            color: white;
+            font-size: 26px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+            z-index: 90;
+            border: none;
+        }
+
+        .bottom-bar {
+            height: 80px;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+            z-index: 90;
+        }
+        .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; }
+        .bottom-bar a.active { color: var(--primary); }
+    </style>
 </head>
 
 <body>
 
-<div class="top-bar">
-  <h1>Hábitos</h1>
-  <p>Crear, editar, pausar o eliminar</p>
-</div>
-
-<div class="content" id="habitList"></div>
-
-<div class="add-btn" onclick="openCreate()">
-  <i class="fas fa-plus"></i>
-</div>
-
-<!-- PANEL NUEVO HÁBITO -->
-<div class="panel" id="createPanel">
-  <div class="panel-header">
-    <h3>Nuevo hábito</h3>
-    <i class="fas fa-times" onclick="closePanels()"></i>
-  </div>
-
-  <label>Nombre del hábito</label>
-  <input id="habitName" placeholder="Ej: Meditar, Leer, Hacer ejercicio">
-
-  <label>Categoría</label>
-  <select id="habitCat">
-    <option>Salud</option>
-    <option>Ejercicio</option>
-    <option>Estudio</option>
-    <option>Sueño</option>
-    <option>Disciplina</option>
-    <option>Social</option>
-  </select>
-
-  <p><b>Desde qué fecha empieza este hábito:</b></p>
-  <div class="options">
-    <div class="option-card">
-      <span><input type="radio" name="range" value="today+" checked> Desde hoy en adelante</span>
+    <div class="top-bar">
+        <h1>Centro de Hábitos</h1>
     </div>
-    <div class="option-card">
-      <span><input type="radio" name="range" value="today"> Solo por hoy</span>
-    </div>
-    <div class="option-card">
-      <span><input type="radio" name="range" value="between"> Desde una fecha hasta otra</span>
-      <div class="option-inputs" style="display:none;">
-        <input type="date" id="startDate">
-        <input type="date" id="endDate">
-      </div>
-    </div>
-    <div class="option-card">
-      <span><input type="radio" name="range" value="from"> Desde una fecha en adelante</span>
-      <div class="option-inputs" style="display:none;">
-        <input type="date" id="fromDate">
-      </div>
-    </div>
-  </div>
 
-  <button class="confirm" onclick="createHabit()">Crear hábito</button>
-  <button class="cancel" onclick="closePanels()">Cancelar</button>
-</div>
+    <div class="content" id="habitList"></div>
 
-<div class="bottom-bar">
-  <a href="index.html"><i class="fas fa-house"></i></a>
-  <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
-  <a href="HabitoHN.html"><i class="fas fa-check"></i></a>
-  <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
-  <a href="AddH.html" class="active"><i class="fas fa-plus"></i></a>
-  <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
-</div>
+    <button class="add-btn" onclick="openPanel('createPanel')">
+        <i class="fas fa-plus"></i>
+    </button>
 
-<script>
-let habits=[];
+    <div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
 
-const startDateDiv = document.querySelector("#startDate").parentNode;
-const endDateDiv = document.querySelector("#endDate") ? document.querySelector("#endDate").parentNode : null;
-const fromDateDiv = document.querySelector("#fromDate").parentNode;
-
-document.querySelectorAll("input[name=range]").forEach(r=>{
-  r.onchange=()=>{
-    // ocultar todos
-    document.querySelectorAll(".option-inputs").forEach(d=>d.style.display="none");
-    // mostrar solo el correspondiente
-    if(r.value==="between") r.closest(".option-card").querySelector(".option-inputs").style.display="flex";
-    if(r.value==="from") r.closest(".option-card").querySelector(".option-inputs").style.display="flex";
-  }
-});
-
-function openCreate(){createPanel.classList.add("active");}
-function closePanels(){createPanel.classList.remove("active");}
-
-function createHabit(){
-  const name = document.getElementById("habitName").value;
-  const cat = document.getElementById("habitCat").value;
-  if(!name || !cat){ alert("Completa todo"); return;}
-  habits.push({name:name, cat:cat, status:"Activo"});
-  document.getElementById("habitName").value="";
-  createPanel.classList.remove("active");
-  render();
-}
-
-function render(){
-  const habitList = document.getElementById("habitList");
-  habitList.innerHTML="";
-  habits.forEach((h,i)=>{
-    habitList.innerHTML+=`
-      <div class="habit-card">
-        <strong>${h.name}</strong><br>
-        <small>${h.cat} · ${h.status}</small>
-        <div class="actions">
-          ${h.status==="Activo"?`<button class="pause" onclick="pauseHabit(${i})">Pausar</button>`:`<button class="confirm" onclick="resumeHabit(${i})">Reanudar</button>`}
-          <button class="edit">Editar</button>
-          <button class="delete" onclick="deleteHabit(${i})">Eliminar</button>
+    <!-- PANEL CREAR -->
+    <div class="panel" id="createPanel">
+        <h3>Nuevo Objetivo</h3>
+        <div class="form-group">
+            <label>Nombre del hábito</label>
+            <input type="text" id="newName" placeholder="Ej: Meditar 15 min">
         </div>
-      </div>`;
-  });
-}
+        <div class="form-group">
+            <label>Categoría</label>
+            <select id="newCat">
+                <option value="Salud">Salud</option>
+                <option value="Ejercicio">Ejercicio</option>
+                <option value="Mente">Mente</option>
+                <option value="Productividad">Productividad</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Cuándo empezar</label>
+            <label class="option-item">
+                <input type="radio" name="nRange" value="today" checked onchange="ui_toggleCreate()">
+                <span>Desde hoy mismo</span>
+            </label>
+            <label class="option-item">
+                <input type="radio" name="nRange" value="specific" onchange="ui_toggleCreate()">
+                <span>Día específico</span>
+            </label>
+            <div id="nSpecificDate" class="sub-input"><input type="date" id="nStartDate"></div>
+            
+            <label class="option-item">
+                <input type="radio" name="nRange" value="range" onchange="ui_toggleCreate()">
+                <span>Rango de fechas</span>
+            </label>
+            <div id="nRangeDates" class="sub-input">
+                <input type="date" id="nRangeStart" placeholder="Inicio">
+                <input type="date" id="nRangeEnd" placeholder="Fin">
+            </div>
+        </div>
+        <button class="btn-confirm" onclick="action_save()">Crear Hábito</button>
+    </div>
 
-function pauseHabit(i){if(confirm("¿Seguro que querés pausar este hábito?")){habits[i].status="Pausado";render();}}
-function resumeHabit(i){habits[i].status="Activo";render();}
-function deleteHabit(i){if(confirm("¿Seguro que querés eliminar este hábito?")){habits.splice(i,1);render();}}
-</script>
+    <!-- PANEL PAUSAR -->
+    <div class="panel" id="pausePanel">
+        <h3>Opciones de Pausa</h3>
+        <div class="form-group">
+            <label class="option-item">
+                <input type="radio" name="pOpt" value="today" checked onchange="ui_togglePause()">
+                <span>Pausar solo por hoy</span>
+            </label>
+            <label class="option-item">
+                <input type="radio" name="pOpt" value="specific" onchange="ui_togglePause()">
+                <span>Pausar un día específico</span>
+            </label>
+            <div id="pSpecificDate" class="sub-input"><input type="date" id="pDate1"></div>
+            
+            <label class="option-item">
+                <input type="radio" name="pOpt" value="range" onchange="ui_togglePause()">
+                <span>Pausar rango de fechas</span>
+            </label>
+            <div id="pRangeDates" class="sub-input">
+                <input type="date" id="pStart"><input type="date" id="pEnd">
+            </div>
 
+            <label class="option-item">
+                <input type="radio" name="pOpt" value="forever" onchange="ui_togglePause()">
+                <span>Pausa indefinida</span>
+            </label>
+        </div>
+        <button class="btn-confirm" onclick="action_confirmPause()">Aplicar Pausa</button>
+    </div>
+
+    <!-- PANEL ELIMINAR -->
+    <div class="panel" id="deletePanel">
+        <h3>Eliminar Registro</h3>
+        <div class="form-group">
+            <label class="option-item">
+                <input type="radio" name="dOpt" value="today+" checked onchange="ui_toggleDelete()">
+                <span>Eliminar desde hoy en adelante</span>
+            </label>
+            <label class="option-item">
+                <input type="radio" name="dOpt" value="total" onchange="ui_toggleDelete()">
+                <span>Eliminar rastro completo</span>
+            </label>
+            <label class="option-item">
+                <input type="radio" name="dOpt" value="program" onchange="ui_toggleDelete()">
+                <span>Programar eliminación</span>
+            </label>
+            <div id="dFutureDate" class="sub-input"><input type="date" id="dDate"></div>
+        </div>
+        <button class="btn-confirm danger" onclick="action_confirmDelete()">Confirmar Eliminación</button>
+    </div>
+
+    <!-- BARRA DE TAREAS -->
+    <div class="bottom-bar">
+        <a href="#"><i class="fas fa-house"></i></a>
+        <a href="#"><i class="fas fa-calendar"></i></a>
+        <a href="#"><i class="fas fa-check"></i></a>
+        <a href="#"><i class="fas fa-lightbulb"></i></a>
+        <a href="#" class="active"><i class="fas fa-plus"></i></a>
+        <a href="#"><i class="fas fa-gear"></i></a>
+    </div>
+
+    <script>
+        const DB_KEY = 'evolvp_habits';
+        let habits = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+        let activeId = null;
+
+        function save() { 
+            localStorage.setItem(DB_KEY, JSON.stringify(habits)); 
+            render(); 
+        }
+
+        // UI HELPERS
+        function openPanel(id, hId = null) {
+            activeId = hId;
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeAllPanels() {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function ui_toggleCreate() {
+            const val = document.querySelector('input[name="nRange"]:checked').value;
+            document.getElementById('nSpecificDate').classList.toggle('visible', val === 'specific');
+            document.getElementById('nRangeDates').classList.toggle('visible', val === 'range');
+        }
+
+        function ui_togglePause() {
+            const val = document.querySelector('input[name="pOpt"]:checked').value;
+            document.getElementById('pSpecificDate').classList.toggle('visible', val === 'specific');
+            document.getElementById('pRangeDates').classList.toggle('visible', val === 'range');
+        }
+
+        function ui_toggleDelete() {
+            const val = document.querySelector('input[name="dOpt"]:checked').value;
+            document.getElementById('dFutureDate').classList.toggle('visible', val === 'program');
+        }
+
+        // ACTIONS
+        function action_save() {
+            const name = document.getElementById('newName').value;
+            if(!name) return;
+
+            const mode = document.querySelector('input[name="nRange"]:checked').value;
+            let start = new Date().toISOString().split('T')[0];
+            let end = null;
+
+            if(mode === 'specific') start = document.getElementById('nStartDate').value;
+            if(mode === 'range') {
+                start = document.getElementById('nRangeStart').value;
+                end = document.getElementById('nRangeEnd').value;
+            }
+
+            habits.push({
+                id: Date.now(),
+                name,
+                cat: document.getElementById('newCat').value,
+                startDate: start,
+                endDate: end,
+                status: 'Activo',
+                pauseData: null,
+                logs: {}
+            });
+            save(); closeAllPanels();
+            document.getElementById('newName').value = '';
+        }
+
+        function action_confirmPause() {
+            const h = habits.find(i => i.id === activeId);
+            const mode = document.querySelector('input[name="pOpt"]:checked').value;
+            h.status = 'Pausado';
+            h.pauseData = { mode };
+            if(mode === 'specific') h.pauseData.date = document.getElementById('pDate1').value;
+            if(mode === 'range') h.pauseData.range = [document.getElementById('pStart').value, document.getElementById('pEnd').value];
+            save(); closeAllPanels();
+        }
+
+        function action_confirmDelete() {
+            const mode = document.querySelector('input[name="dOpt"]:checked').value;
+            if(mode === 'total' || mode === 'today+') {
+                // 'today+' se comporta como eliminación inmediata del registro por ahora, 
+                // pero podrías expandirlo para guardar logs históricos si fuera necesario.
+                habits = habits.filter(i => i.id !== activeId);
+            } else {
+                const h = habits.find(i => i.id === activeId);
+                h.status = 'Pre-eliminacion';
+                h.deletionDate = document.getElementById('dDate').value;
+            }
+            save(); closeAllPanels();
+        }
+
+        function action_resume(id) {
+            const h = habits.find(i => i.id === id);
+            h.status = 'Activo';
+            h.pauseData = null;
+            h.deletionDate = null;
+            save();
+        }
+
+        function render() {
+            const list = document.getElementById('habitList');
+            if(habits.length === 0) {
+                list.innerHTML = `<p style="text-align:center; margin-top:50px; color:var(--text-muted)">No hay hábitos creados.</p>`;
+                return;
+            }
+
+            list.innerHTML = habits.map(h => {
+                const isPreDel = h.status === 'Pre-eliminacion';
+                const isPaused = h.status === 'Pausado';
+                const isOff = h.status !== 'Activo';
+
+                return `
+                <div class="habit-card">
+                    <div class="habit-info">
+                        <h3>${h.name}</h3>
+                        <div class="meta-tags">
+                            <span class="badge badge-cat">${h.cat}</span>
+                            <span class="badge badge-${h.status.toLowerCase().replace('-','')}">${h.status}</span>
+                        </div>
+                        <span class="date-info">
+                            <i class="far fa-clock"></i> Inicia: ${h.startDate} ${h.endDate ? ' | Fin: '+h.endDate : ''}
+                            ${h.deletionDate ? `<br><strong style="color:var(--danger)">Programado para borrar: ${h.deletionDate}</strong>` : ''}
+                        </span>
+                    </div>
+                    <div class="button-grid">
+                        ${isPreDel 
+                            ? `<button class="btn btn-undo" onclick="action_resume(${h.id})"><i class="fas fa-undo"></i> ¡Arrepentirme!</button>`
+                            : isPaused
+                                ? `<button class="btn btn-resume" onclick="action_resume(${h.id})"><i class="fas fa-play"></i> Reanudar</button>`
+                                : `<button class="btn btn-main" onclick="openPanel('pausePanel', ${h.id})"><i class="fas fa-pause"></i> Pausar</button>`
+                        }
+                        <button class="btn btn-delete" onclick="openPanel('deletePanel', ${h.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        window.onload = render;
+    </script>
 </body>
 </html>
