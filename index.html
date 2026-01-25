@@ -1,214 +1,274 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>EvolvP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>EvolvP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:system-ui,sans-serif;
+}
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: system-ui, sans-serif;
-    }
+body{
+  background:#f4f6f8;
+  padding-bottom:110px;
+}
 
-    body {
-      background: #f4f6f8;
-      min-height: 100vh;
-      padding-bottom: 100px;
-    }
+/* ---------- TOP BAR ---------- */
+.top-bar{
+  background:linear-gradient(135deg,#4CAF50,#66bb6a);
+  color:white;
+  padding:18px;
+  border-radius:0 0 24px 24px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.2);
+}
 
-    /* ---------- TOP BAR ---------- */
-    .top-bar {
-      background: white;
-      padding: 14px 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
+.top-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-    .top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.app-name{
+  font-size:22px;
+  font-weight:800;
+}
 
-    .app-name {
-      font-size: 20px;
-      font-weight: 700;
-    }
+.date{
+  font-size:14px;
+  opacity:0.9;
+}
 
-    .date {
-      font-size: 14px;
-      color: #666;
-    }
+.stats{
+  display:flex;
+  gap:14px;
+  margin-top:12px;
+}
 
-    .stats {
-      margin-top: 6px;
-      display: flex;
-      gap: 16px;
-      font-size: 14px;
-    }
+.stat-card{
+  flex:1;
+  background:rgba(255,255,255,0.2);
+  padding:10px;
+  border-radius:14px;
+  text-align:center;
+  font-size:14px;
+}
 
-    /* ---------- MAIN ---------- */
-    .main {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 16px;
-    }
+/* ---------- MAIN ---------- */
+.main{
+  padding:24px 16px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
 
-    canvas {
-      max-width: 320px;
-      max-height: 320px;
-    }
+canvas{
+  max-width:320px;
+}
 
-    .summary {
-      margin-top: 20px;
-      background: white;
-      padding: 16px 22px;
-      border-radius: 18px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-      font-size: 14px;
-      text-align: center;
-    }
+/* ---------- CONFIG PANEL ---------- */
+.config{
+  margin-top:24px;
+  width:100%;
+  max-width:420px;
+  background:white;
+  border-radius:20px;
+  padding:18px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.12);
+}
 
-    /* ---------- BOTTOM BAR ---------- */
-    .bottom-bar {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      width: calc(100% - 32px);
-      max-width: 520px;
-      height: 64px;
-      border-radius: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 10;
-    }
+.config h3{
+  margin-bottom:12px;
+}
 
-    .bottom-bar a {
-      color: #888;
-      font-size: 22px;
-      text-decoration: none;
-      transition: 0.2s;
-    }
+.axis-item{
+  display:flex;
+  gap:8px;
+  margin-bottom:8px;
+}
 
-    .bottom-bar a.active {
-      color: #4CAF50;
-      transform: scale(1.15);
-    }
-  </style>
+.axis-item input{
+  flex:1;
+  padding:8px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+.axis-item button{
+  border:none;
+  background:#f44336;
+  color:white;
+  border-radius:10px;
+  padding:0 12px;
+}
+
+.add-axis{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.add-axis input{
+  flex:1;
+  padding:8px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+.add-axis button{
+  background:#4CAF50;
+  color:white;
+  border:none;
+  border-radius:10px;
+  padding:0 14px;
+}
+
+/* ---------- BOTTOM BAR ---------- */
+.bottom-bar{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(255,255,255,0.95);
+  backdrop-filter:blur(10px);
+  width:calc(100% - 32px);
+  max-width:560px;
+  height:64px;
+  border-radius:26px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+}
+
+.bottom-bar a{
+  color:#888;
+  font-size:22px;
+  text-decoration:none;
+  transition:.2s;
+}
+
+.bottom-bar a.active{
+  color:#4CAF50;
+  transform:scale(1.15);
+}
+</style>
 </head>
+
 <body>
 
-  <!-- TOP BAR -->
-  <div class="top-bar">
-    <div class="top-row">
-      <div class="app-name">EvolvP</div>
-      <div class="date" id="date"></div>
-    </div>
-    <div class="stats">
-      🔥 Racha: <b>7 días</b>
-      📊 Total: <b>21 días</b>
-    </div>
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-row">
+    <div class="app-name">EvolvP</div>
+    <div class="date" id="date"></div>
   </div>
 
-  <!-- MAIN CONTENT -->
-  <div class="main">
-    <canvas id="habitChart"></canvas>
+  <div class="stats">
+    <div class="stat-card">🔥 Racha<br><b>7 días</b></div>
+    <div class="stat-card">📊 Total<br><b>21 días</b></div>
+  </div>
+</div>
 
-    <div class="summary">
-      Estado general de tus hábitos hoy
+<!-- MAIN -->
+<div class="main">
+  <canvas id="habitChart"></canvas>
+
+  <!-- CONFIG -->
+  <div class="config">
+    <h3>Configurar gráfico</h3>
+    <div id="axisList"></div>
+
+    <div class="add-axis">
+      <input type="text" id="newAxis" placeholder="Nueva característica">
+      <button onclick="addAxis()">+</button>
     </div>
   </div>
+</div>
 
-  <!-- BOTTOM BAR -->
-  <div class="bottom-bar">
-    <a href="index.html" class="active" title="Inicio">
-      <i class="fas fa-house"></i>
-    </a>
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <a href="index.html" class="active"><i class="fas fa-house"></i></a>
+  <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
+  <a href="HabitoHN.html"><i class="fas fa-check"></i></a>
+  <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
+  <a href="AddH.html"><i class="fas fa-plus"></i></a>
+  <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
+</div>
 
-    <a href="Calendario.html" title="Calendario">
-      <i class="fas fa-calendar"></i>
-    </a>
+<script>
+document.getElementById("date").innerText =
+  new Date().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"short"});
 
-    <a href="Consejos.html" title="Consejos">
-      <i class="fas fa-lightbulb"></i>
-    </a>
+let axes = ["Salud","Ejercicio","Estudio","Sueño","Disciplina","Social"];
+let values = axes.map(()=>3);
 
-    <a href="Ajustes.html" title="Ajustes">
-      <i class="fas fa-gear"></i>
-    </a>
+const ctx = document.getElementById("habitChart");
+let chart = new Chart(ctx,{
+  type:"radar",
+  data:{
+    labels:axes,
+    datasets:[{
+      data:values,
+      backgroundColor:"rgba(76,175,80,0.2)",
+      borderColor:"#4CAF50",
+      pointBackgroundColor:"#4CAF50"
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{r:{suggestedMin:0,suggestedMax:5}}
+  }
+});
 
-    <a href="HabitoHN.html" title="Marcar hábito">
-      <i class="fas fa-check"></i>
-    </a>
+function renderAxes(){
+  const list=document.getElementById("axisList");
+  list.innerHTML="";
+  axes.forEach((a,i)=>{
+    list.innerHTML+=`
+      <div class="axis-item">
+        <input value="${a}" oninput="editAxis(${i},this.value)">
+        <button onclick="removeAxis(${i})">✕</button>
+      </div>`;
+  });
+}
 
-    <a href="AddH.html" title="Agregar hábito">
-      <i class="fas fa-plus"></i>
-    </a>
-  </div>
+function editAxis(i,val){
+  axes[i]=val;
+  chart.data.labels=axes;
+  chart.update();
+}
 
-  <!-- SCRIPT -->
-  <script>
-    // Fecha actual
-    document.getElementById("date").innerText =
-      new Date().toLocaleDateString("es-ES", {
-        weekday: "long",
-        day: "numeric",
-        month: "short"
-      });
+function addAxis(){
+  const v=document.getElementById("newAxis").value;
+  if(!v) return;
+  axes.push(v);
+  values.push(3);
+  document.getElementById("newAxis").value="";
+  chart.data.labels=axes;
+  chart.data.datasets[0].data=values;
+  chart.update();
+  renderAxes();
+}
 
-    // Gráfico de hábitos
-    const ctx = document.getElementById("habitChart");
+function removeAxis(i){
+  axes.splice(i,1);
+  values.splice(i,1);
+  chart.data.labels=axes;
+  chart.data.datasets[0].data=values;
+  chart.update();
+  renderAxes();
+}
 
-    new Chart(ctx, {
-      type: "radar",
-      data: {
-        labels: [
-          "Salud",
-          "Ejercicio",
-          "Estudio",
-          "Sueño",
-          "Disciplina",
-          "Social"
-        ],
-        datasets: [{
-          data: [4, 3, 5, 2, 4, 3],
-          fill: true,
-          backgroundColor: "rgba(76, 175, 80, 0.2)",
-          borderColor: "#4CAF50",
-          pointBackgroundColor: "#4CAF50"
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          r: {
-            suggestedMin: 0,
-            suggestedMax: 5,
-            ticks: { display: false },
-            grid: { color: "#ddd" }
-          }
-        }
-      }
-    });
-  </script>
+renderAxes();
+</script>
 
 </body>
 </html>
