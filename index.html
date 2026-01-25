@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hábitos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, sans-serif;
+    }
+
+    body {
+      background: #f4f6f8;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ---------- HEADER ---------- */
+    .header {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .header span {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* ---------- MAIN ---------- */
+    .main {
+      width: 100%;
+      max-width: 420px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      max-width: 320px;
+      max-height: 320px;
+    }
+
+    /* ---------- SUMMARY ---------- */
+    .summary {
+      margin-top: 20px;
+      background: white;
+      padding: 14px 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* ---------- BOTTOM BAR ---------- */
+    .bottom-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      width: calc(100% - 32px);
+      max-width: 420px;
+      height: 60px;
+      border-radius: 22px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .bottom-bar i {
+      font-size: 22px;
+      color: #888;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .bottom-bar i.active {
+      color: #4CAF50;
+      transform: scale(1.15);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Tus hábitos hoy</h1>
+    <span>Lunes · 26 Ene</span>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <canvas id="habitChart"></canvas>
+
+    <div class="summary">
+      ✅ Hábitos cumplidos: <b>4 / 6</b><br>
+      🔥 Racha actual: <b>7 días</b>
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <i class="fas fa-house active"></i>
+    <i class="fas fa-calendar"></i>
+    <i class="fas fa-lightbulb"></i>
+    <i class="fas fa-gear"></i>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    const ctx = document.getElementById('habitChart');
+
+    new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: [
+          'Salud',
+          'Ejercicio',
+          'Estudio',
+          'Sueño',
+          'Disciplina',
+          'Social'
+        ],
+        datasets: [{
+          data: [4, 3, 5, 2, 4, 3],
+          fill: true,
+          backgroundColor: 'rgba(76, 175, 80, 0.2)',
+          borderColor: '#4CAF50',
+          pointBackgroundColor: '#4CAF50'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: {
+            suggestedMin: 0,
+            suggestedMax: 5,
+            ticks: {
+              display: false
+            },
+            grid: {
+              color: '#ddd'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
