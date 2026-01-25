@@ -28,12 +28,20 @@ body{
   padding:18px;
   border-radius:0 0 24px 24px;
   box-shadow:0 6px 20px rgba(0,0,0,0.2);
+  position:relative;
+}
+
+.menu-btn{
+  position:absolute;
+  left:16px;
+  top:16px;
+  font-size:22px;
+  cursor:pointer;
 }
 
 .top-row{
   display:flex;
-  justify-content:space-between;
-  align-items:center;
+  justify-content:center;
 }
 
 .app-name{
@@ -42,56 +50,67 @@ body{
 }
 
 .date{
+  text-align:center;
   font-size:14px;
-  opacity:0.9;
+  opacity:.9;
+  margin-top:4px;
 }
 
 .stats{
   display:flex;
-  gap:14px;
-  margin-top:12px;
+  justify-content:space-around;
+  margin-top:14px;
 }
 
-.stat-card{
-  flex:1;
-  background:rgba(255,255,255,0.2);
-  padding:10px;
-  border-radius:14px;
+.stat{
   text-align:center;
-  font-size:14px;
+  font-size:22px;
+  font-weight:700;
+}
+
+.stat i{
+  display:block;
+  font-size:26px;
+  margin-bottom:4px;
 }
 
 /* ---------- MAIN ---------- */
 .main{
   padding:24px 16px;
   display:flex;
-  flex-direction:column;
-  align-items:center;
+  justify-content:center;
 }
 
 canvas{
   max-width:320px;
 }
 
-/* ---------- CONFIG PANEL ---------- */
-.config{
-  margin-top:24px;
-  width:100%;
-  max-width:420px;
+/* ---------- SIDEBAR CONFIG ---------- */
+.sidebar{
+  position:fixed;
+  top:0;
+  left:-320px;
+  width:300px;
+  height:100%;
   background:white;
-  border-radius:20px;
-  padding:18px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  box-shadow:4px 0 20px rgba(0,0,0,.2);
+  padding:20px;
+  transition:.3s;
+  z-index:20;
 }
 
-.config h3{
-  margin-bottom:12px;
+.sidebar.active{
+  left:0;
+}
+
+.sidebar h3{
+  margin-bottom:16px;
 }
 
 .axis-item{
   display:flex;
   gap:8px;
-  margin-bottom:8px;
+  margin-bottom:10px;
 }
 
 .axis-item input{
@@ -106,13 +125,13 @@ canvas{
   background:#f44336;
   color:white;
   border-radius:10px;
-  padding:0 12px;
+  padding:0 10px;
 }
 
 .add-axis{
   display:flex;
   gap:8px;
-  margin-top:10px;
+  margin-top:12px;
 }
 
 .add-axis input{
@@ -164,33 +183,41 @@ canvas{
 
 <body>
 
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <h3>Configurar gráfico</h3>
+  <div id="axisList"></div>
+  <div class="add-axis">
+    <input id="newAxis" placeholder="Nueva característica">
+    <button onclick="addAxis()">+</button>
+  </div>
+</div>
+
 <!-- TOP BAR -->
 <div class="top-bar">
+  <i class="fas fa-bars menu-btn" onclick="toggleSidebar()"></i>
+
   <div class="top-row">
     <div class="app-name">EvolvP</div>
-    <div class="date" id="date"></div>
   </div>
 
+  <div class="date" id="date"></div>
+
   <div class="stats">
-    <div class="stat-card">🔥 Racha<br><b>7 días</b></div>
-    <div class="stat-card">📊 Total<br><b>21 días</b></div>
+    <div class="stat">
+      <i class="fas fa-fire"></i>
+      7
+    </div>
+    <div class="stat">
+      <i class="fas fa-chart-line"></i>
+      21
+    </div>
   </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <canvas id="habitChart"></canvas>
-
-  <!-- CONFIG -->
-  <div class="config">
-    <h3>Configurar gráfico</h3>
-    <div id="axisList"></div>
-
-    <div class="add-axis">
-      <input type="text" id="newAxis" placeholder="Nueva característica">
-      <button onclick="addAxis()">+</button>
-    </div>
-  </div>
 </div>
 
 <!-- BOTTOM BAR -->
@@ -207,19 +234,36 @@ canvas{
 document.getElementById("date").innerText =
   new Date().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"short"});
 
-let axes = ["Salud","Ejercicio","Estudio","Sueño","Disciplina","Social"];
-let values = axes.map(()=>3);
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("active");
+}
 
-const ctx = document.getElementById("habitChart");
-let chart = new Chart(ctx,{
-  type:"radar",
+/* ---- Radar center dot plugin ---- */
+const centerDot = {
+  id:'centerDot',
+  afterDraw(chart){
+    const ctx = chart.ctx;
+    const center = chart.scales.r.getPointPosition(0,0);
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, 4, 0, Math.PI*2);
+    ctx.fillStyle = '#4CAF50';
+    ctx.fill();
+  }
+};
+
+let axes=["Salud","Ejercicio","Estudio","Sueño","Disciplina","Social"];
+let values=axes.map(()=>3);
+
+const chart = new Chart(habitChart,{
+  type:'radar',
+  plugins:[centerDot],
   data:{
     labels:axes,
     datasets:[{
       data:values,
-      backgroundColor:"rgba(76,175,80,0.2)",
-      borderColor:"#4CAF50",
-      pointBackgroundColor:"#4CAF50"
+      backgroundColor:'rgba(76,175,80,.2)',
+      borderColor:'#4CAF50',
+      pointBackgroundColor:'#4CAF50'
     }]
   },
   options:{
@@ -229,10 +273,9 @@ let chart = new Chart(ctx,{
 });
 
 function renderAxes(){
-  const list=document.getElementById("axisList");
-  list.innerHTML="";
+  axisList.innerHTML="";
   axes.forEach((a,i)=>{
-    list.innerHTML+=`
+    axisList.innerHTML+=`
       <div class="axis-item">
         <input value="${a}" oninput="editAxis(${i},this.value)">
         <button onclick="removeAxis(${i})">✕</button>
@@ -240,18 +283,18 @@ function renderAxes(){
   });
 }
 
-function editAxis(i,val){
-  axes[i]=val;
+function editAxis(i,v){
+  axes[i]=v;
   chart.data.labels=axes;
   chart.update();
 }
 
 function addAxis(){
-  const v=document.getElementById("newAxis").value;
+  const v=newAxis.value;
   if(!v) return;
   axes.push(v);
   values.push(3);
-  document.getElementById("newAxis").value="";
+  newAxis.value="";
   chart.data.labels=axes;
   chart.data.datasets[0].data=values;
   chart.update();
