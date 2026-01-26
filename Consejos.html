@@ -16,6 +16,7 @@
   --accent-color: #4CAF50;
   --tag-bg: #f0f0f0;
   --icon-bg: #e8f5e9;
+  --safe-area-bg: #4CAF50; /* Color verde para la franja inferior */
 }
 
 [data-theme="dark"] {
@@ -25,6 +26,7 @@
   --text-sub: #aaaaaa;
   --tag-bg: #3d3d3d;
   --icon-bg: #2e3d2e;
+  --safe-area-bg: #2e7d32;
 }
 
 *{
@@ -54,8 +56,9 @@ html, body{
 .app-name{ font-size:24px; font-weight:800; }
 .subtitle{ font-size: 14px; opacity: 0.9; margin-top: 4px; }
 
+/* Ajuste de altura del contenido principal considerando las dos barras inferiores */
 .main-content {
-  height: calc(100% - 120px - 84px);
+  height: calc(100% - 120px - 70px - 25px);
   overflow-y: auto;
   padding: 20px 16px;
   -webkit-overflow-scrolling: touch;
@@ -95,14 +98,31 @@ html, body{
   text-transform: uppercase;
 }
 
-.bottom-bar{
-  height:84px; position:fixed; bottom:0; left:0; right:0;
-  background: var(--card-bg); display:flex;
-  justify-content:space-around; align-items:center;
-  box-shadow:0 -6px 20px rgba(0,0,0,0.15); z-index: 100;
+/* Contenedor de navegación inferior mejorado */
+.navigation-wrapper {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
 }
 
-.bottom-bar a{ color: #888; font-size:22px; text-decoration:none; padding: 10px; }
+.bottom-bar{
+  height: 70px; /* Un poco más baja para elegancia */
+  background: var(--card-bg); 
+  display: flex;
+  justify-content: space-around; 
+  align-items: center;
+  box-shadow: 0 -6px 20px rgba(0,0,0,0.15);
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Barra verde inferior para proteger de los gestos del celular */
+.safe-area-bar {
+  height: 25px;
+  background: var(--safe-area-bg);
+  width: 100%;
+}
+
+.bottom-bar a{ color: #888; font-size:22px; text-decoration:none; padding: 10px; transition: 0.2s; }
 .bottom-bar a.active{ color:#4CAF50; }
 .main-content::-webkit-scrollbar { display: none; }
 </style>
@@ -157,18 +177,21 @@ html, body{
   </div>
 </div>
 
-<div class="bottom-bar">
-  <a href="index.html"><i class="fas fa-house"></i></a>
-  <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
-  <a href="HabitoHN.html"><i class="fas fa-check"></i></a>
-  <a href="Consejos.html" class="active"><i class="fas fa-lightbulb"></i></a>
-  <a href="AddH.html"><i class="fas fa-plus"></i></a>
-  <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
+<div class="navigation-wrapper">
+  <div class="bottom-bar">
+    <a href="index.html"><i class="fas fa-house"></i></a>
+    <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
+    <a href="HabitoHN.html"><i class="fas fa-check"></i></a>
+    <a href="Consejos.html" class="active"><i class="fas fa-lightbulb"></i></a>
+    <a href="AddH.html"><i class="fas fa-plus"></i></a>
+    <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
+  </div>
+  <div class="safe-area-bar"></div>
 </div>
 
 <script>
 window.onload = () => {
-  const savedTheme = localStorage.getItem('evolvp_theme'); // Clave unificada
+  const savedTheme = localStorage.getItem('evolvp_theme');
   if(savedTheme === 'dark') {
     document.body.setAttribute('data-theme', 'dark');
   }
