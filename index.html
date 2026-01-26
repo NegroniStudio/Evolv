@@ -63,12 +63,13 @@
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             padding: 10px; border-radius: 15px;
-            display: flex; align-items: center; justify-content: center;
-            gap: 10px; border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .stat-card i { font-size: 20px; }
-        .stat-card span { font-weight: 700; font-size: 20px; }
+        .stat-card i { font-size: 14px; margin-bottom: 2px; opacity: 0.8; }
+        .stat-card span { font-weight: 800; font-size: 22px; }
+        .stat-label { font-size: 9px; font-weight: 800; text-transform: uppercase; opacity: 0.7; }
 
         /* ---------- MAIN CONTENT ---------- */
         .main {
@@ -121,16 +122,6 @@
         .cat-item span { font-weight: 600; font-size: 14px; }
         .btn-del-cat { color: var(--danger); cursor: pointer; padding: 5px; }
 
-        .add-cat-form { display: flex; gap: 8px; }
-        .add-cat-form input {
-            flex: 1; padding: 12px; border: 2px solid #f1f5f9;
-            border-radius: 12px; outline: none; font-size: 14px;
-        }
-        .btn-add-cat {
-            background: var(--primary); color: white; border: none;
-            padding: 0 15px; border-radius: 12px; font-weight: bold; cursor: pointer;
-        }
-
         /* ---------- BOTTOM BAR ---------- */
         .bottom-bar {
             height: 84px; background: white; display: flex;
@@ -148,9 +139,12 @@
 <div class="side-panel" id="sidePanel">
     <div class="panel-title">Categorías</div>
     <div class="cat-list" id="categoryList"></div>
-    <div class="add-cat-form">
-        <input type="text" id="newCatInput" placeholder="Nueva categoría...">
-        <button class="btn-add-cat" onclick="addCategory()">+</button>
+    <div class="p-4 bg-slate-50 rounded-xl mt-auto">
+        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Nueva Categoría</p>
+        <div class="flex gap-2">
+            <input type="text" id="newCatInput" class="flex-1 p-2 rounded-lg border text-sm outline-none" placeholder="Ejem: Trabajo">
+            <button onclick="addCategory()" class="bg-green-500 text-white px-3 rounded-lg font-bold">+</button>
+        </div>
     </div>
 </div>
 
@@ -160,17 +154,17 @@
             <i class="fas fa-bars"></i>
         </div>
         <div class="app-name">EvolvP</div>
-        <i class="fas fa-user-circle"></i>
+        <i class="fas fa-user-circle text-2xl opacity-80"></i>
     </div>
-    <div class="date-text" id="dateDisplay"></div>
+    <div class="date-text" id="dateDisplay">---</div>
     <div class="stats-grid">
         <div class="stat-card">
-            <i class="fas fa-fire"></i>
-            <span id="streakDisplay">0</span>
+            <div class="stat-label">Racha Actual</div>
+            <div><i class="fas fa-fire text-orange-400"></i> <span id="streakDisplay">0</span></div>
         </div>
         <div class="stat-card">
-            <i class="fas fa-check-circle"></i>
-            <span id="totalDoneDisplay">0</span>
+            <div class="stat-label">Días Logrados</div>
+            <div><i class="fas fa-medal text-yellow-400"></i> <span id="totalDoneDisplay">0</span></div>
         </div>
     </div>
 </div>
@@ -181,9 +175,9 @@
     </div>
     <div id="noDataMessage" class="empty-state" style="display: none;">
         <i class="fas fa-chart-pie" style="font-size: 40px; margin-bottom: 10px; opacity: 0.3;"></i>
-        <p>Añade hábitos para ver tu radar de evolución.</p>
+        <p class="font-bold text-sm">Configura al menos 3 categorías con hábitos para ver tu radar de evolución.</p>
     </div>
-    <p id="chartLabel" style="margin-top:15px; color:var(--text-muted); font-size:13px; font-weight: bold;">Nivel de Evolución Diaria</p>
+    <p id="chartLabel" style="margin-top:15px; color:var(--text-muted); font-size:12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Radar de Evolución Diaria</p>
 </div>
 
 <div class="bottom-bar">
@@ -207,8 +201,7 @@
             categorias: ["Salud", "Ejercicio", "Estudio", "Disciplina"]
         };
         if (!data) return defaults;
-        const parsed = JSON.parse(data);
-        return { ...defaults, ...parsed };
+        return JSON.parse(data);
     }
 
     function saveAppData(data) {
@@ -250,47 +243,78 @@
         saveAppData(data);
     }
 
+    // --- LÓGICA DE ESTADÍSTICAS ---
     function calculateStats() {
         const data = getAppData();
         const hoy = new Date().toISOString().split('T')[0];
+        const minRatio = data.config?.rachaMinima || 0.65;
         
-        // Total completados histórico (días únicos con al menos un hábito hecho)
-        const totalDias = Object.keys(data.completados).filter(k => data.completados[k].length > 0).length;
-        document.getElementById('totalDoneDisplay').innerText = totalDias;
+        // 1. Días Logrados Totales (todos los días que superaron el umbral, histórico)
+        let diasGanadosTotales = 0;
+        Object.keys(data.completados).forEach(dateKey => {
+            const stats = getStatsForDate(data, dateKey);
+            if (stats.total > 0 && stats.ratio >= minRatio) {
+                diasGanadosTotales++;
+            }
+        });
+        document.getElementById('totalDoneDisplay').innerText = diasGanadosTotales;
 
-        // Cálculo de racha
+        // 2. Cálculo de Racha (Mirando hacia atrás)
         let streak = 0;
-        let checkDate = new Date();
-        const habitosActivosCount = data.habitos.filter(h => h.status === 'Activo').length;
+        let iterDate = new Date(); // Empezamos hoy
+        
+        while (true) {
+            const dateStr = iterDate.toISOString().split('T')[0];
+            const stats = getStatsForDate(data, dateStr);
 
-        if (habitosActivosCount > 0) {
-            while (true) {
-                const dateStr = checkDate.toISOString().split('T')[0];
-                const hechos = data.completados[dateStr] || [];
-                const ratio = hechos.length / habitosActivosCount;
-                
-                if (ratio >= (data.config.rachaMinima || 0.65)) {
-                    streak++;
-                    checkDate.setDate(checkDate.getDate() - 1);
+            if (stats.total > 0 && stats.ratio >= minRatio) {
+                // El día fue ganado
+                streak++;
+            } else {
+                // El día no fue ganado. ¿Es hoy? 
+                if (dateStr === hoy) {
+                    // Si es hoy, NO rompemos racha todavía, simplemente pasamos a ver ayer
                 } else {
-                    // Si es hoy y aún no completa, no rompe racha, solo sigue mirando atrás
-                    if (dateStr === hoy) {
-                        checkDate.setDate(checkDate.getDate() - 1);
-                        continue;
-                    }
+                    // Si es un día pasado y no se ganó, la racha se rompe aquí
                     break;
                 }
             }
+            
+            // Retroceder un día
+            iterDate.setDate(iterDate.getDate() - 1);
+            
+            // Límite de seguridad por si acaso
+            if (streak > 5000) break; 
         }
+        
         document.getElementById('streakDisplay').innerText = streak;
+    }
+
+    function getStatsForDate(data, dateKey) {
+        // Hábitos que estaban activos en esa fecha
+        const activosEnEsaFecha = data.habitos.filter(h => {
+            const isStarted = dateKey >= h.startDate;
+            const isNotEnded = !h.endDate || dateKey <= h.endDate;
+            return isStarted && isNotEnded && h.status === 'Activo';
+        });
+
+        const logs = data.completados[dateKey] || {};
+        // Contamos cuántos de los activos están en el log de ese día
+        const hechos = activosEnEsaFecha.filter(h => logs[h.id]);
+        
+        return {
+            done: hechos.length,
+            total: activosEnEsaFecha.length,
+            ratio: activosEnEsaFecha.length > 0 ? (hechos.length / activosEnEsaFecha.length) : 0
+        };
     }
 
     function renderChart() {
         const data = getAppData();
         const hoy = new Date().toISOString().split('T')[0];
-        const hechosHoy = data.completados[hoy] || [];
+        const logHoy = data.completados[hoy] || {};
 
-        // Filtramos solo categorías que tengan hábitos para no ensuciar el gráfico
+        // Solo categorías con hábitos activos
         const catsConHabitos = data.categorias.filter(cat => 
             data.habitos.some(h => h.categoria === cat && h.status === 'Activo')
         );
@@ -308,9 +332,7 @@
 
         const valores = catsConHabitos.map(cat => {
             const deEstaCat = data.habitos.filter(h => h.categoria === cat && h.status === 'Activo');
-            const hechosDeEstaCat = deEstaCat.filter(h => hechosHoy.includes(h.nombre) || hechosHoy.includes(h.id.toString()));
-            
-            // Nivel de 0 a 5 según el porcentaje completado
+            const hechosDeEstaCat = deEstaCat.filter(h => logHoy[h.id]);
             return deEstaCat.length > 0 ? (hechosDeEstaCat.length / deEstaCat.length) * 5 : 0;
         });
 
@@ -322,13 +344,14 @@
             data: {
                 labels: catsConHabitos,
                 datasets: [{
-                    label: 'Progreso',
+                    label: 'Nivel hoy',
                     data: valores,
-                    backgroundColor: 'rgba(76, 175, 80, 0.3)',
+                    backgroundColor: 'rgba(76, 175, 80, 0.25)',
                     borderColor: '#4CAF50',
                     borderWidth: 3,
                     pointBackgroundColor: '#4CAF50',
-                    pointRadius: 4
+                    pointRadius: 4,
+                    lineTension: 0.2
                 }]
             },
             options: {
@@ -336,21 +359,19 @@
                 maintainAspectRatio: false,
                 scales: {
                     r: {
-                        min: 0,
-                        max: 5,
+                        min: 0, max: 5,
                         beginAtZero: true,
-                        ticks: { stepSize: 1, display: false },
+                        ticks: { display: false, stepSize: 1 },
                         grid: { color: 'rgba(0,0,0,0.05)' },
-                        angleLines: { color: 'rgba(0,0,0,0.05)' },
+                        angleLines: { color: 'rgba(0,0,0,0.1)' },
                         pointLabels: {
-                            font: { size: 12, weight: '700' },
+                            font: { size: 11, weight: '800' },
                             color: '#475569'
                         }
                     }
                 },
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
+                    legend: { display: false }
                 }
             }
         });
@@ -365,6 +386,11 @@
     }
 
     window.onload = initApp;
+
+    // Detectar cambios realizados en otras pantallas
+    window.addEventListener('storage', (e) => {
+        if (e.key === DB_KEY) initApp();
+    });
 </script>
 </body>
 </html>
