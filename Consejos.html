@@ -5,7 +5,6 @@
 <title>EvolvP - Consejos</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<!-- Font Awesome para los iconos -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
@@ -15,21 +14,23 @@
   --text-main: #333;
   --text-sub: #666;
   --accent-color: #4CAF50;
+  --tag-bg: #f0f0f0;
+  --icon-bg: #e8f5e9;
 }
 
-/* Soporte para Modo Oscuro heredado de ajustes */
 [data-theme="dark"] {
   --bg-color: #1a1a1a;
   --card-bg: #2d2d2d;
   --text-main: #ffffff;
   --text-sub: #aaaaaa;
+  --tag-bg: #3d3d3d;
+  --icon-bg: #2e3d2e;
 }
 
 *{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:system-ui, -apple-system, sans-serif;
+  margin:0; padding:0; box-sizing:border-box;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  transition: background 0.3s, color 0.3s;
 }
 
 html, body{
@@ -39,7 +40,6 @@ html, body{
   overflow: hidden;
 }
 
-/* ---------- TOP BAR ---------- */
 .top-bar{
   height:120px;
   background:linear-gradient(135deg,#4CAF50,#66bb6a);
@@ -47,26 +47,13 @@ html, body{
   padding:18px;
   border-radius:0 0 24px 24px;
   box-shadow:0 6px 20px rgba(0,0,0,0.15);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 10; position: relative;
 }
 
-.app-name{
-  font-size:24px;
-  font-weight:800;
-}
+.app-name{ font-size:24px; font-weight:800; }
+.subtitle{ font-size: 14px; opacity: 0.9; margin-top: 4px; }
 
-.subtitle{
-  font-size: 14px;
-  opacity: 0.9;
-  margin-top: 4px;
-}
-
-/* ---------- MAIN CONTENT ---------- */
 .main-content {
   height: calc(100% - 120px - 84px);
   overflow-y: auto;
@@ -74,87 +61,49 @@ html, body{
   -webkit-overflow-scrolling: touch;
 }
 
-/* Tarjetas de Consejos */
 .tip-card {
   background: var(--card-bg);
   border-radius: 20px;
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: flex; flex-direction: column; gap: 12px;
   border-left: 5px solid var(--accent-color);
 }
 
-.tip-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.tip-header { display: flex; align-items: center; gap: 12px; }
 
 .tip-icon {
-  width: 45px;
-  height: 45px;
-  background: #e8f5e9;
+  width: 45px; height: 45px;
+  background: var(--icon-bg);
   color: var(--accent-color);
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   font-size: 20px;
 }
 
-.tip-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--accent-color);
-}
-
-.tip-description {
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-sub);
-}
+.tip-title { font-size: 18px; font-weight: 700; color: var(--accent-color); }
+.tip-description { font-size: 14px; line-height: 1.5; color: var(--text-sub); }
 
 .tip-tag {
   align-self: flex-start;
   padding: 4px 12px;
-  background: #f0f0f0;
+  background: var(--tag-bg);
   border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #888;
+  font-size: 11px; font-weight: 600;
+  color: var(--text-sub);
   text-transform: uppercase;
 }
 
-/* ---------- BOTTOM BAR ---------- */
 .bottom-bar{
-  height:84px;
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background: var(--card-bg);
-  backdrop-filter:blur(10px);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  box-shadow:0 -6px 20px rgba(0,0,0,0.15);
-  z-index: 100;
+  height:84px; position:fixed; bottom:0; left:0; right:0;
+  background: var(--card-bg); display:flex;
+  justify-content:space-around; align-items:center;
+  box-shadow:0 -6px 20px rgba(0,0,0,0.15); z-index: 100;
 }
 
-.bottom-bar a{
-  color: #888;
-  font-size:22px;
-  text-decoration:none;
-  padding: 10px;
-}
-
-.bottom-bar a.active{
-  color:#4CAF50;
-}
-
+.bottom-bar a{ color: #888; font-size:22px; text-decoration:none; padding: 10px; }
+.bottom-bar a.active{ color:#4CAF50; }
 .main-content::-webkit-scrollbar { display: none; }
 </style>
 </head>
@@ -167,64 +116,47 @@ html, body{
 </div>
 
 <div class="main-content">
-
-  <!-- Consejo 1 -->
   <div class="tip-card">
     <div class="tip-header">
       <div class="tip-icon"><i class="fas fa-seedling"></i></div>
       <div class="tip-title">Empieza Pequeño</div>
     </div>
-    <p class="tip-description">No intentes cambiar tu vida en un día. Si quieres leer más, empieza con 2 páginas por noche. La clave es la consistencia, no la intensidad inicial.</p>
+    <p class="tip-description">No intentes cambiar tu vida en un día. Empieza con 2 páginas por noche. La clave es la consistencia.</p>
     <div class="tip-tag">Productividad</div>
   </div>
 
-  <!-- Consejo 2 -->
   <div class="tip-card">
     <div class="tip-header">
       <div class="tip-icon"><i class="fas fa-link"></i></div>
       <div class="tip-title">Apilado de Hábitos</div>
     </div>
-    <p class="tip-description">Une un hábito nuevo a uno que ya tengas. Ejemplo: "Después de mi café de la mañana (hábito actual), meditaré un minuto (hábito nuevo)".</p>
+    <p class="tip-description">Une un hábito nuevo a uno que ya tengas. Ejemplo: "Después de mi café, meditaré un minuto".</p>
     <div class="tip-tag">Psicología</div>
   </div>
 
-  <!-- Consejo 3 -->
   <div class="tip-card">
     <div class="tip-header">
       <div class="tip-icon"><i class="fas fa-brain"></i></div>
       <div class="tip-title">Regla de los 2 Minutos</div>
     </div>
-    <p class="tip-description">Si un hábito nuevo te toma menos de dos minutos, hazlo de inmediato. Esto rompe la barrera de la procrastinación y te pone en movimiento.</p>
+    <p class="tip-description">Si un hábito nuevo te toma menos de dos minutos, hazlo de inmediato para romper la procrastinación.</p>
     <div class="tip-tag">Disciplina</div>
   </div>
 
-  <!-- Consejo 4 -->
   <div class="tip-card">
     <div class="tip-header">
       <div class="tip-icon"><i class="fas fa-bed"></i></div>
       <div class="tip-title">Higiene del Sueño</div>
     </div>
-    <p class="tip-description">Tu disciplina depende de tu descanso. Intenta apagar las pantallas 30 minutos antes de dormir para que tu cerebro produzca melatonina de forma natural.</p>
+    <p class="tip-description">Apaga las pantallas 30 minutos antes de dormir para que tu cerebro descanse realmente.</p>
     <div class="tip-tag">Salud</div>
-  </div>
-
-  <!-- Consejo 5 -->
-  <div class="tip-card">
-    <div class="tip-header">
-      <div class="tip-icon"><i class="fas fa-water"></i></div>
-      <div class="tip-title">Hidratación Constante</div>
-    </div>
-    <p class="tip-description">Beber agua mejora tu enfoque mental. Mantén una botella siempre a la vista; el entorno diseñado facilita el hábito.</p>
-    <div class="tip-tag">Bienestar</div>
   </div>
 
   <div style="text-align: center; margin-bottom: 20px; opacity: 0.5; font-size: 12px;">
     Desliza para ver más consejos
   </div>
-
 </div>
 
-<!-- BOTTOM BAR -->
 <div class="bottom-bar">
   <a href="index.html"><i class="fas fa-house"></i></a>
   <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
@@ -235,9 +167,8 @@ html, body{
 </div>
 
 <script>
-// Detectar tema oscuro guardado
 window.onload = () => {
-  const savedTheme = localStorage.getItem('theme');
+  const savedTheme = localStorage.getItem('evolvp_theme'); // Clave unificada
   if(savedTheme === 'dark') {
     document.body.setAttribute('data-theme', 'dark');
   }
