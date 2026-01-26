@@ -16,7 +16,8 @@
   --accent-color: #4CAF50;
   --tag-bg: #f0f0f0;
   --icon-bg: #e8f5e9;
-  --safe-area-bg: #4CAF50; /* Color verde para la franja inferior */
+  --safe-area-bg: #4CAF50;
+  --danger-color: #ff5252;
 }
 
 [data-theme="dark"] {
@@ -54,9 +55,31 @@ html, body{
 }
 
 .app-name{ font-size:24px; font-weight:800; }
-.subtitle{ font-size: 14px; opacity: 0.9; margin-top: 4px; }
 
-/* Ajuste de altura del contenido principal considerando las dos barras inferiores */
+.tab-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.tab-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  padding: 6px 15px;
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: white;
+  color: var(--accent-color);
+}
+
 .main-content {
   height: calc(100% - 120px - 70px - 25px);
   overflow-y: auto;
@@ -64,6 +87,10 @@ html, body{
   -webkit-overflow-scrolling: touch;
 }
 
+.section { display: none; }
+.section.active { display: block; }
+
+/* Estilos de Tarjetas Fijas */
 .tip-card {
   background: var(--card-bg);
   border-radius: 20px;
@@ -98,7 +125,80 @@ html, body{
   text-transform: uppercase;
 }
 
-/* Contenedor de navegación inferior mejorado */
+/* Estilos de Consejos Personalizados */
+.my-tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-tip-item {
+  background: var(--card-bg);
+  border-radius: 15px;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tip-number {
+  background: var(--accent-color);
+  color: white;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 14px;
+  flex-shrink: 0;
+}
+
+.tip-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 5px 0;
+  font-size: 15px;
+}
+
+.tip-input:focus { outline: none; }
+
+.delete-btn {
+  color: var(--text-sub);
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.delete-btn:hover { color: var(--danger-color); opacity: 1; }
+
+.add-btn {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.add-btn:active { transform: scale(0.98); }
+
 .navigation-wrapper {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -106,7 +206,7 @@ html, body{
 }
 
 .bottom-bar{
-  height: 70px; /* Un poco más baja para elegancia */
+  height: 70px;
   background: var(--card-bg); 
   display: flex;
   justify-content: space-around; 
@@ -115,7 +215,6 @@ html, body{
   border-top: 1px solid rgba(0,0,0,0.05);
 }
 
-/* Barra verde inferior para proteger de los gestos del celular */
 .safe-area-bar {
   height: 25px;
   background: var(--safe-area-bg);
@@ -132,48 +231,67 @@ html, body{
 
 <div class="top-bar">
   <div class="app-name">Consejos</div>
-  <div class="subtitle">Sabiduría para tu evolución</div>
+  <div class="tab-container">
+    <button class="tab-btn active" onclick="switchTab('fixed')">Sabiduría</button>
+    <button class="tab-btn" onclick="switchTab('custom')">Mis Notas</button>
+  </div>
 </div>
 
 <div class="main-content">
-  <div class="tip-card">
-    <div class="tip-header">
-      <div class="tip-icon"><i class="fas fa-seedling"></i></div>
-      <div class="tip-title">Empieza Pequeño</div>
+  <!-- SECCIÓN CONSEJOS FIJOS -->
+  <div id="section-fixed" class="section active">
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon"><i class="fas fa-seedling"></i></div>
+        <div class="tip-title">Empieza Pequeño</div>
+      </div>
+      <p class="tip-description">No intentes cambiar tu vida en un día. Empieza con 2 páginas por noche. La clave es la consistencia.</p>
+      <div class="tip-tag">Productividad</div>
     </div>
-    <p class="tip-description">No intentes cambiar tu vida en un día. Empieza con 2 páginas por noche. La clave es la consistencia.</p>
-    <div class="tip-tag">Productividad</div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon"><i class="fas fa-link"></i></div>
+        <div class="tip-title">Apilado de Hábitos</div>
+      </div>
+      <p class="tip-description">Une un hábito nuevo a uno que ya tengas. Ejemplo: "Después de mi café, meditaré un minuto".</p>
+      <div class="tip-tag">Psicología</div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon"><i class="fas fa-brain"></i></div>
+        <div class="tip-title">Regla de los 2 Minutos</div>
+      </div>
+      <p class="tip-description">Si un hábito nuevo te toma menos de dos minutos, hazlo de inmediato para romper la procrastinación.</p>
+      <div class="tip-tag">Disciplina</div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon"><i class="fas fa-bed"></i></div>
+        <div class="tip-title">Higiene del Sueño</div>
+      </div>
+      <p class="tip-description">Apaga las pantallas 30 minutos antes de dormir para que tu cerebro descanse realmente.</p>
+      <div class="tip-tag">Salud</div>
+    </div>
   </div>
 
-  <div class="tip-card">
-    <div class="tip-header">
-      <div class="tip-icon"><i class="fas fa-link"></i></div>
-      <div class="tip-title">Apilado de Hábitos</div>
+  <!-- SECCIÓN CONSEJOS PERSONALIZADOS -->
+  <div id="section-custom" class="section">
+    <div style="margin-bottom: 15px; font-size: 14px; color: var(--text-sub); text-align: center;">
+      Tus recordatorios personales e infinitos.
     </div>
-    <p class="tip-description">Une un hábito nuevo a uno que ya tengas. Ejemplo: "Después de mi café, meditaré un minuto".</p>
-    <div class="tip-tag">Psicología</div>
-  </div>
-
-  <div class="tip-card">
-    <div class="tip-header">
-      <div class="tip-icon"><i class="fas fa-brain"></i></div>
-      <div class="tip-title">Regla de los 2 Minutos</div>
+    
+    <div class="my-tips-list" id="userTipsContainer">
+      <!-- Los inputs se generan dinámicamente -->
     </div>
-    <p class="tip-description">Si un hábito nuevo te toma menos de dos minutos, hazlo de inmediato para romper la procrastinación.</p>
-    <div class="tip-tag">Disciplina</div>
-  </div>
 
-  <div class="tip-card">
-    <div class="tip-header">
-      <div class="tip-icon"><i class="fas fa-bed"></i></div>
-      <div class="tip-title">Higiene del Sueño</div>
-    </div>
-    <p class="tip-description">Apaga las pantallas 30 minutos antes de dormir para que tu cerebro descanse realmente.</p>
-    <div class="tip-tag">Salud</div>
-  </div>
-
-  <div style="text-align: center; margin-bottom: 20px; opacity: 0.5; font-size: 12px;">
-    Desliza para ver más consejos
+    <button class="add-btn" onclick="addNewTip()">
+      <i class="fas fa-plus-circle"></i> Añadir nuevo consejo
+    </button>
+    
+    <div style="height: 40px;"></div>
   </div>
 </div>
 
@@ -190,11 +308,81 @@ html, body{
 </div>
 
 <script>
+let userTips = [];
+
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  
+  if(tab === 'fixed') {
+    document.getElementById('section-fixed').classList.add('active');
+    document.querySelector('button[onclick="switchTab(\'fixed\')"]').classList.add('active');
+  } else {
+    document.getElementById('section-custom').classList.add('active');
+    document.querySelector('button[onclick="switchTab(\'custom\')"]').classList.add('active');
+  }
+}
+
+function renderTips() {
+  const container = document.getElementById('userTipsContainer');
+  container.innerHTML = '';
+  
+  userTips.forEach((text, index) => {
+    const item = document.createElement('div');
+    item.className = 'user-tip-item';
+    item.innerHTML = `
+      <div class="tip-number">${index + 1}</div>
+      <input type="text" class="tip-input" placeholder="Escribe algo importante..." 
+             value="${text}" oninput="updateTipText(${index}, this.value)">
+      <button class="delete-btn" onclick="removeTip(${index})">
+        <i class="fas fa-trash-alt"></i>
+      </button>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function addNewTip() {
+  userTips.push('');
+  renderTips();
+  saveToStorage();
+  // Hacer focus al último input añadido
+  const inputs = document.querySelectorAll('.tip-input');
+  if(inputs.length > 0) inputs[inputs.length - 1].focus();
+}
+
+function updateTipText(index, val) {
+  userTips[index] = val;
+  saveToStorage();
+}
+
+function removeTip(index) {
+  userTips.splice(index, 1);
+  renderTips();
+  saveToStorage();
+}
+
+function saveToStorage() {
+  localStorage.setItem('evolvp_user_tips_v2', JSON.stringify(userTips));
+}
+
+function loadTips() {
+  const saved = localStorage.getItem('evolvp_user_tips_v2');
+  if(saved) {
+    userTips = JSON.parse(saved);
+  } else {
+    // Si es la primera vez, cargar 3 vacíos por defecto
+    userTips = ['', '', ''];
+  }
+  renderTips();
+}
+
 window.onload = () => {
   const savedTheme = localStorage.getItem('evolvp_theme');
   if(savedTheme === 'dark') {
     document.body.setAttribute('data-theme', 'dark');
   }
+  loadTips();
 }
 </script>
 
