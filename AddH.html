@@ -245,12 +245,7 @@
         <div class="form-group">
             <label>Categoría</label>
             <select id="newCat">
-                <option value="Salud">Salud</option>
-                <option value="Ejercicio">Ejercicio</option>
-                <option value="Estudio">Estudio</option>
-                <option value="Social">Social</option>
-                <option value="Disciplina">Disciplina</option>
-                <option value="Sueño">Sueño</option>
+                <!-- Se llena dinámicamente desde el almacenamiento global -->
             </select>
         </div>
         <div class="form-group">
@@ -344,7 +339,12 @@
         
         function getRawData() {
             let raw = localStorage.getItem(DB_KEY);
-            return raw ? JSON.parse(raw) : { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
+            const defaultCats = ["Salud", "Ejercicio", "Estudio", "Disciplina"];
+            if (!raw) return { habitos: [], completados: {}, config: { rachaMinima: 0.65 }, categorias: defaultCats };
+            
+            let data = JSON.parse(raw);
+            if (!data.categorias) data.categorias = defaultCats;
+            return data;
         }
 
         let appData = getRawData();
@@ -358,6 +358,7 @@
         // UI HELPERS
         function openPanel(id, hId = null) {
             activeId = hId;
+            if (id === 'createPanel') loadCategoriesIntoSelect();
             document.getElementById('overlay').classList.add('active');
             document.getElementById(id).classList.add('active');
         }
@@ -365,6 +366,12 @@
         function closeAllPanels() {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.getElementById('overlay').classList.remove('active');
+        }
+
+        function loadCategoriesIntoSelect() {
+            const select = document.getElementById('newCat');
+            const data = getRawData();
+            select.innerHTML = data.categorias.map(cat => `<option value="${cat}">${cat}</option>`).join('');
         }
 
         function ui_toggleCreate() {
@@ -401,8 +408,8 @@
 
             appData.habitos.push({
                 id: Date.now(),
-                nombre: name, // Cambio a 'nombre' para index.html
-                categoria: document.getElementById('newCat').value, // Cambio a 'categoria'
+                nombre: name,
+                categoria: document.getElementById('newCat').value,
                 startDate: start,
                 endDate: end,
                 status: 'Activo',
@@ -485,7 +492,11 @@
             }).join('');
         }
 
-        window.onload = render;
+        window.onload = () => {
+            appData = getRawData();
+            loadCategoriesIntoSelect();
+            render();
+        };
     </script>
 </body>
 </html>
