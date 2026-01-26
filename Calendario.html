@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Calendario | EvolvP</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -18,7 +18,7 @@
             --accent-green: #4CAF50;
         }
 
-        .dark-mode {
+        [data-theme="dark"] {
             --bg-color: #0f172a;
             --card-bg: #1e293b;
             --text-main: #f1f5f9;
@@ -44,6 +44,7 @@
             justify-content: space-between;
             position: relative;
             z-index: 20;
+            flex-shrink: 0;
         }
 
         .top-nav { display: flex; justify-content: space-between; align-items: center; }
@@ -52,7 +53,7 @@
 
         /* ---------- CONTENIDO PRINCIPAL ---------- */
         .main-content {
-            height: calc(100% - 120px - 104px); /* Ajustado para la nueva altura de la barra */
+            height: calc(100% - 120px - 95px); /* Ajustado para compensar la barra inferior y la de seguridad */
             overflow-y: auto;
             padding: 20px;
             -webkit-overflow-scrolling: touch;
@@ -119,7 +120,7 @@
             outline-offset: -3px;
         }
 
-        .dark-mode .day-cell.active {
+        [data-theme="dark"] .day-cell.active {
             outline-color: #fff;
         }
 
@@ -129,13 +130,16 @@
             border-radius: 20px;
             text-align: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
         }
 
-        /* ---------- BARRA INFERIOR ACTUALIZADA ---------- */
+        /* ---------- NAVEGACIÓN ELEVADA + BARRA SEGURIDAD ---------- */
         .nav-container {
             position: fixed;
             bottom: 0; left: 0; right: 0;
             z-index: 100;
+            display: flex;
+            flex-direction: column;
         }
 
         .bottom-bar {
@@ -165,9 +169,8 @@
             border-radius: 12px; 
         }
 
-        /* Barra verde de seguridad para botones del sistema */
         .safe-area-bar {
-            height: 24px;
+            height: 25px;
             background: #4CAF50;
             width: 100%;
         }
@@ -214,7 +217,6 @@
         </div>
     </div>
 
-    <!-- Contenedor de navegación elevado con barra de seguridad -->
     <div class="nav-container">
         <div class="bottom-bar">
             <a href="index.html"><i class="fas fa-house"></i></a>
@@ -230,17 +232,19 @@
     <script>
         const DB_KEY = 'evolvp_data';
         const SEL_KEY = 'evolvp_selected_date';
+        const THEME_KEY = 'evolvp_theme';
         
-        let appData = { habitos: [], completados: {}, config: { rachaMinima: 0.65, darkMode: false } };
+        let appData = { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
         let viewDate = new Date(); 
         let todayKey = new Date().toISOString().split('T')[0];
         let selectedDate = localStorage.getItem(SEL_KEY) || todayKey;
 
         function applyTheme() {
-            if (appData.config?.darkMode) {
-                document.body.classList.add('dark-mode');
+            const theme = localStorage.getItem(THEME_KEY);
+            if (theme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
             } else {
-                document.body.classList.remove('dark-mode');
+                document.body.setAttribute('data-theme', 'light');
             }
         }
 
@@ -249,7 +253,7 @@
             if (raw) {
                 appData = JSON.parse(raw);
                 if (!appData.completados) appData.completados = {};
-                if (!appData.config) appData.config = { rachaMinima: 0.65, darkMode: false };
+                if (!appData.config) appData.config = { rachaMinima: 0.65 };
             }
             applyTheme();
         }
@@ -345,7 +349,9 @@
 
         window.onload = () => {
             loadData();
-            viewDate = new Date(selectedDate + 'T12:00:00');
+            // Asegurar que la vista inicial sea la del mes de la fecha seleccionada
+            const initialDate = new Date(selectedDate + 'T12:00:00');
+            if(!isNaN(initialDate)) viewDate = initialDate;
             renderCalendar();
         };
 
