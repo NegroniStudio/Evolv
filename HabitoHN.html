@@ -10,7 +10,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         html, body { height: 100%; overflow: hidden; background: #f8fafc; }
 
-        /* ---------- BARRA SUPERIOR (120px) ---------- */
         .top-bar {
             height: 120px;
             background: linear-gradient(135deg, #4CAF50, #66bb6a);
@@ -26,12 +25,9 @@
         }
 
         .top-nav { display: flex; justify-content: space-between; align-items: center; }
-
         .month-selector { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 18px; }
-
         .month-arrow { font-size: 14px; cursor: pointer; padding: 6px; background: rgba(255,255,255,0.2); border-radius: 50%; }
 
-        /* ---------- SELECTOR SEMANAL ---------- */
         .week-container {
             display: flex;
             align-items: center;
@@ -54,9 +50,8 @@
             min-width: 38px;
             transition: 0.2s;
         }
-        .day-item.selected { background: white; color: #4CAF50; font-weight: 800; transform: scale(1.05); }
+        .day-item.selected { background: white; color: #4CAF50; font-weight: 800; transform: scale(1.05); outline: 2px solid black; }
 
-        /* ---------- CONTENIDO PRINCIPAL ---------- */
         .main-content {
             height: calc(100% - 120px - 84px);
             overflow-y: auto;
@@ -110,7 +105,6 @@
         }
         .check-circle.active { background: #4CAF50; border-color: #4CAF50; color: white; }
 
-        /* ---------- BARRA INFERIOR (84px) ---------- */
         .bottom-bar {
             height: 84px;
             position: fixed;
@@ -169,20 +163,17 @@
     </div>
 
     <script>
-        // --- CONEXIÓN SINCRONIZADA CON AddH.html ---
-        const DB_KEY = 'evolvp_data'; // MISMA CLAVE QUE EN TU CLIP
+        const DB_KEY = 'evolvp_data';
+        const SELECTED_DATE_KEY = 'evolvp_selected_date';
         
-        let appData = { 
-            habitos: [], 
-            completados: {}, 
-            config: { rachaMinima: 0.65 } 
-        };
+        let appData = { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
+        let selectedDate = localStorage.getItem(SELECTED_DATE_KEY) || new Date().toISOString().split('T')[0];
+        let currentWeekStart = new Date(selectedDate + 'T12:00:00');
 
         function loadData() {
             const raw = localStorage.getItem(DB_KEY);
             if (raw) {
                 appData = JSON.parse(raw);
-                // Asegurar compatibilidad si los nombres de campos varían
                 if (!appData.completados) appData.completados = {};
             }
         }
@@ -191,10 +182,6 @@
             localStorage.setItem(DB_KEY, JSON.stringify(appData));
         }
 
-        let selectedDate = new Date().toISOString().split('T')[0];
-        let currentWeekStart = new Date();
-
-        // Ajustar semana para que empiece en Lunes
         function setWeekToMonday(date) {
             const d = new Date(date);
             const day = d.getDay();
@@ -203,19 +190,16 @@
             d.setHours(0,0,0,0);
             return d;
         }
+
         currentWeekStart = setWeekToMonday(currentWeekStart);
 
         window.toggleHabit = (habitId) => {
             if (!appData.completados[selectedDate]) appData.completados[selectedDate] = {};
-            
-            // Invertir estado
             appData.completados[selectedDate][habitId] = !appData.completados[selectedDate][habitId];
-            
             saveData();
             render();
         };
 
-        // Navegación
         document.getElementById('prevWeek').onclick = () => { currentWeekStart.setDate(currentWeekStart.getDate() - 7); render(); };
         document.getElementById('nextWeek').onclick = () => { currentWeekStart.setDate(currentWeekStart.getDate() + 7); render(); };
         document.getElementById('prevMonth').onclick = () => { currentWeekStart.setMonth(currentWeekStart.getMonth() - 1); currentWeekStart = setWeekToMonday(currentWeekStart); render(); };
@@ -245,7 +229,11 @@
                     <span class="opacity-60 uppercase" style="font-size: 9px">${d.toLocaleDateString('es', {weekday: 'short'}).substring(0,2)}</span>
                     <span class="text-sm font-bold">${d.getDate()}</span>
                 `;
-                dayItem.onclick = () => { selectedDate = dKey; render(); };
+                dayItem.onclick = () => { 
+                    selectedDate = dKey; 
+                    localStorage.setItem(SELECTED_DATE_KEY, dKey);
+                    render(); 
+                };
                 daysRow.appendChild(dayItem);
             }
         }
@@ -256,7 +244,6 @@
             const dayLog = appData.completados[selectedDate] || {};
             list.innerHTML = '';
 
-            // Filtrar hábitos que no deberían aparecer (por fecha de inicio o si están eliminados)
             const activeHabits = habits.filter(h => {
                 const isStarted = selectedDate >= h.startDate;
                 const isNotEnded = !h.endDate || selectedDate <= h.endDate;
@@ -264,25 +251,17 @@
             });
 
             if(activeHabits.length === 0) {
-                list.innerHTML = `
-                    <div class="text-center py-12 opacity-40">
-                        <i class="fas fa-leaf text-4xl mb-3 text-green-500"></i>
-                        <p class="text-sm font-bold">No hay hábitos para este día</p>
-                        <p class="text-[10px] mt-1 uppercase">Crea uno nuevo en el menú (+)</p>
-                    </div>`;
+                list.innerHTML = `<div class="text-center py-12 opacity-40"><p class="text-sm font-bold">No hay hábitos para este día</p></div>`;
             } else {
                 activeHabits.forEach(h => {
                     const isDone = dayLog[h.id];
                     const isPaused = h.status === 'Pausado';
-                    
                     const item = document.createElement('div');
                     item.className = `habit-item ${isPaused ? 'paused' : ''}`;
                     item.innerHTML = `
                         <div class="flex-1" onclick="${!isPaused ? `toggleHabit('${h.id}')` : ''}">
                             <p class="font-bold text-slate-700">${h.nombre}</p>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
-                                ${isPaused ? 'PAUSADO' : (h.categoria || 'General')}
-                            </p>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">${isPaused ? 'PAUSADO' : (h.categoria || 'General')}</p>
                         </div>
                         <div class="check-circle ${isDone ? 'active' : ''}" onclick="${!isPaused ? `toggleHabit('${h.id}')` : ''}">
                             <i class="fas fa-check text-xs"></i>
@@ -291,7 +270,6 @@
                     list.appendChild(item);
                 });
             }
-
             const dObj = new Date(selectedDate + 'T12:00:00');
             document.getElementById('dateLabel').innerText = dObj.toLocaleDateString('es-ES', { day:'numeric', month:'short' });
         }
@@ -301,32 +279,23 @@
             const dayLog = appData.completados[selectedDate] || {};
             const done = habits.filter(h => dayLog[h.id]).length;
             const perc = habits.length > 0 ? Math.round((done / habits.length) * 100) : 0;
-
             document.getElementById('percText').innerText = perc + '%';
             document.getElementById('circProgress').style.setProperty('--p', (perc * 3.6) + 'deg');
-            
             const msg = document.getElementById('statusMsg');
             const target = (appData.config?.rachaMinima * 100) || 65;
-            
-            if(perc >= target) {
-                msg.innerText = "¡Meta cumplida!";
-                msg.style.color = "#4CAF50";
-            } else {
-                msg.innerText = `Objetivo ${target}%`;
-                msg.style.color = "#94a3b8";
-            }
+            msg.innerText = perc >= target ? "¡Meta cumplida!" : `Objetivo ${target}%`;
+            msg.style.color = perc >= target ? "#4CAF50" : "#94a3b8";
         }
 
-        // Carga inicial y escucha de cambios externos
-        window.addEventListener('load', () => {
-            loadData();
-            render();
-        });
-
-        // Esto detecta cambios si tienes dos pestañas abiertas al mismo tiempo
-        window.addEventListener('storage', () => {
-            loadData();
-            render();
+        window.addEventListener('load', () => { loadData(); render(); });
+        window.addEventListener('storage', () => { 
+            const newDate = localStorage.getItem(SELECTED_DATE_KEY);
+            if(newDate) {
+                selectedDate = newDate;
+                currentWeekStart = setWeekToMonday(new Date(selectedDate + 'T12:00:00'));
+            }
+            loadData(); 
+            render(); 
         });
     </script>
 </body>
