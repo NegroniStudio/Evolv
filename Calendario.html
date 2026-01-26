@@ -76,9 +76,10 @@
             color: #475569;
             transition: 0.2s;
             background: #f1f5f9;
+            cursor: pointer;
         }
 
-        .day-cell.empty { background: transparent; }
+        .day-cell.empty { background: transparent; cursor: default; }
         
         .day-cell.today { 
             border: 2px solid #4CAF50;
@@ -92,11 +93,12 @@
             box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
         }
 
-        /* Día seleccionado */
+        /* Día seleccionado con contorno negro */
         .day-cell.active {
-            transform: scale(1.1);
+            transform: scale(1.05);
             z-index: 5;
-            outline: 2px solid #000;
+            outline: 3px solid #000;
+            outline-offset: -3px;
         }
 
         /* INFO CARD */
@@ -130,7 +132,7 @@
     <div class="top-bar">
         <div class="top-nav">
             <div class="text-[10px] font-black opacity-50 tracking-tighter">EVOLVP</div>
-            <div class="text-[10px] font-bold opacity-70">MODO LOCAL</div>
+            <div class="text-[10px] font-bold opacity-70">CALENDARIO</div>
         </div>
 
         <div class="month-selector mb-2">
@@ -162,6 +164,7 @@
                 </div>
             </div>
             <p id="detailStatus" class="mt-3 text-[11px] font-bold uppercase tracking-widest text-slate-400"></p>
+            <a href="HabitoHN.html" class="block w-full bg-black text-white mt-4 py-3 rounded-xl font-bold text-sm">GESTIONAR DÍA</a>
         </div>
     </div>
 
@@ -176,10 +179,14 @@
 
     <script>
         const DB_KEY = 'evolvp_data';
-        let appData = { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
+        const SEL_KEY = 'evolvp_selected_date'; // Clave para persistir la selección
         
-        let viewDate = new Date(); // Fecha que el calendario está mostrando
+        let appData = { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
+        let viewDate = new Date(); 
         let todayKey = new Date().toISOString().split('T')[0];
+        
+        // Recuperar fecha seleccionada guardada o por defecto hoy
+        let selectedDate = localStorage.getItem(SEL_KEY) || todayKey;
 
         function loadData() {
             const raw = localStorage.getItem(DB_KEY);
@@ -199,36 +206,45 @@
 
             monthText.innerText = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(viewDate);
 
-            // Primer día del mes
             const firstDay = new Date(year, month, 1);
-            // Ajustar para que lunes sea 0
             let startOffset = firstDay.getDay() - 1;
             if (startOffset === -1) startOffset = 6;
 
-            // Días totales en el mes
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // Espacios vacíos iniciales
             for (let i = 0; i < startOffset; i++) {
                 grid.innerHTML += `<div class="day-cell empty"></div>`;
             }
 
-            // Días del mes
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
+                
                 if (dateKey === todayKey) cell.classList.add('today');
+                if (dateKey === selectedDate) cell.classList.add('active'); // Resaltar si es el guardado
+                
                 cell.innerText = d;
 
-                // Calcular si el día fue "Ganado"
                 const stats = getDayStats(dateKey);
                 if (stats.total > 0 && stats.perc >= (appData.config?.rachaMinima * 100 || 65)) {
                     cell.classList.add('won');
                 }
 
-                cell.onclick = () => showDetail(dateKey, d, stats);
+                cell.onclick = () => {
+                    selectedDate = dateKey;
+                    localStorage.setItem(SEL_KEY, dateKey); // Guardar selección
+                    renderCalendar(); // Refrescar para mover el contorno negro
+                    showDetail(dateKey, stats);
+                };
                 grid.appendChild(cell);
+            }
+
+            // Si el día seleccionado pertenece al mes que estamos viendo, mostrar el panel
+            if (selectedDate.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)) {
+                showDetail(selectedDate, getDayStats(selectedDate));
+            } else {
+                document.getElementById('dayDetail').classList.add('hidden');
             }
         }
 
@@ -244,11 +260,7 @@
             return { done, total: habits.length, perc };
         }
 
-        function showDetail(dateKey, day, stats) {
-            // Quitar selección previa
-            document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
+        function showDetail(dateKey, stats) {
             const panel = document.getElementById('dayDetail');
             panel.classList.remove('hidden');
 
@@ -271,17 +283,16 @@
             }
         }
 
-        // Navegación de meses
         document.getElementById('prevMonth').onclick = () => { viewDate.setMonth(viewDate.getMonth() - 1); renderCalendar(); };
         document.getElementById('nextMonth').onclick = () => { viewDate.setMonth(viewDate.getMonth() + 1); renderCalendar(); };
 
-        // Carga inicial
         window.onload = () => {
             loadData();
+            // Iniciar la vista del calendario en el mes de la fecha seleccionada
+            viewDate = new Date(selectedDate + 'T12:00:00');
             renderCalendar();
         };
 
-        // Sincronizar si cambia en otra pestaña
         window.addEventListener('storage', () => {
             loadData();
             renderCalendar();
