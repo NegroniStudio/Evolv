@@ -25,8 +25,6 @@
         }
 
         .top-nav { display: flex; justify-content: space-between; align-items: center; }
-        .month-selector { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 18px; }
-        .month-arrow { font-size: 14px; cursor: pointer; padding: 6px; background: rgba(255,255,255,0.2); border-radius: 50%; }
 
         .week-container {
             display: flex;
@@ -50,7 +48,16 @@
             min-width: 38px;
             transition: 0.2s;
         }
-        .day-item.selected { background: white; color: #4CAF50; font-weight: 800; transform: scale(1.05); outline: 2px solid black; }
+        
+        /* Contorno negro para el día seleccionado en la barra semanal de hábitos */
+        .day-item.selected { 
+            background: white; 
+            color: #4CAF50; 
+            font-weight: 800; 
+            transform: scale(1.05); 
+            outline: 3px solid #000;
+            outline-offset: -2px;
+        }
 
         .main-content {
             height: calc(100% - 120px - 84px);
@@ -93,8 +100,6 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         }
 
-        .habit-item.paused { opacity: 0.5; filter: grayscale(1); }
-
         .check-circle {
             width: 34px; height: 34px;
             border-radius: 10px;
@@ -125,11 +130,7 @@
 
     <div class="top-bar">
         <div class="top-nav">
-            <div class="month-selector">
-                <i class="fas fa-chevron-left month-arrow" id="prevMonth"></i>
-                <span id="monthText">Mes</span>
-                <i class="fas fa-chevron-right month-arrow" id="nextMonth"></i>
-            </div>
+            <div class="text-[12px] font-black uppercase tracking-widest opacity-80" id="monthText">Mes</div>
             <div class="text-[10px] font-black opacity-50 tracking-tighter">EVOLVP</div>
         </div>
 
@@ -146,7 +147,7 @@
                 <span id="percText">0%</span>
             </div>
             <div>
-                <h3 class="font-extrabold text-lg text-slate-800" id="dateLabel">Hoy</h3>
+                <h3 class="font-extrabold text-lg text-slate-800" id="dateLabel">---</h3>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="statusMsg">Objetivo 65%</p>
             </div>
         </div>
@@ -164,10 +165,14 @@
 
     <script>
         const DB_KEY = 'evolvp_data';
-        const SELECTED_DATE_KEY = 'evolvp_selected_date';
+        const SEL_KEY = 'evolvp_selected_date';
         
         let appData = { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
-        let selectedDate = localStorage.getItem(SELECTED_DATE_KEY) || new Date().toISOString().split('T')[0];
+        
+        // 1. Obtener la fecha seleccionada del localStorage. Si no hay, usar hoy.
+        let selectedDate = localStorage.getItem(SEL_KEY) || new Date().toISOString().split('T')[0];
+        
+        // 2. Establecer el inicio de la semana basándose en la fecha SELECCIONADA, no en hoy.
         let currentWeekStart = new Date(selectedDate + 'T12:00:00');
 
         function loadData() {
@@ -200,10 +205,9 @@
             render();
         };
 
+        // Navegación semanal manual
         document.getElementById('prevWeek').onclick = () => { currentWeekStart.setDate(currentWeekStart.getDate() - 7); render(); };
         document.getElementById('nextWeek').onclick = () => { currentWeekStart.setDate(currentWeekStart.getDate() + 7); render(); };
-        document.getElementById('prevMonth').onclick = () => { currentWeekStart.setMonth(currentWeekStart.getMonth() - 1); currentWeekStart = setWeekToMonday(currentWeekStart); render(); };
-        document.getElementById('nextMonth').onclick = () => { currentWeekStart.setMonth(currentWeekStart.getMonth() + 1); currentWeekStart = setWeekToMonday(currentWeekStart); render(); };
 
         function render() {
             renderWeek();
@@ -215,6 +219,8 @@
             const daysRow = document.getElementById('daysRow');
             const monthText = document.getElementById('monthText');
             daysRow.innerHTML = '';
+            
+            // Mostrar el mes correspondiente al inicio de la semana visible
             monthText.innerText = currentWeekStart.toLocaleDateString('es-ES', { month: 'long' });
 
             for(let i=0; i<7; i++) {
@@ -231,7 +237,7 @@
                 `;
                 dayItem.onclick = () => { 
                     selectedDate = dKey; 
-                    localStorage.setItem(SELECTED_DATE_KEY, dKey);
+                    localStorage.setItem(SEL_KEY, dKey);
                     render(); 
                 };
                 daysRow.appendChild(dayItem);
@@ -251,17 +257,17 @@
             });
 
             if(activeHabits.length === 0) {
-                list.innerHTML = `<div class="text-center py-12 opacity-40"><p class="text-sm font-bold">No hay hábitos para este día</p></div>`;
+                list.innerHTML = `<div class="text-center py-12 opacity-40"><p class="text-sm font-bold">No hay hábitos</p></div>`;
             } else {
                 activeHabits.forEach(h => {
                     const isDone = dayLog[h.id];
                     const isPaused = h.status === 'Pausado';
                     const item = document.createElement('div');
-                    item.className = `habit-item ${isPaused ? 'paused' : ''}`;
+                    item.className = `habit-item ${isPaused ? 'opacity-40 grayscale' : ''}`;
                     item.innerHTML = `
                         <div class="flex-1" onclick="${!isPaused ? `toggleHabit('${h.id}')` : ''}">
                             <p class="font-bold text-slate-700">${h.nombre}</p>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">${isPaused ? 'PAUSADO' : (h.categoria || 'General')}</p>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">${h.categoria || 'General'}</p>
                         </div>
                         <div class="check-circle ${isDone ? 'active' : ''}" onclick="${!isPaused ? `toggleHabit('${h.id}')` : ''}">
                             <i class="fas fa-check text-xs"></i>
@@ -281,22 +287,20 @@
             const perc = habits.length > 0 ? Math.round((done / habits.length) * 100) : 0;
             document.getElementById('percText').innerText = perc + '%';
             document.getElementById('circProgress').style.setProperty('--p', (perc * 3.6) + 'deg');
-            const msg = document.getElementById('statusMsg');
             const target = (appData.config?.rachaMinima * 100) || 65;
-            msg.innerText = perc >= target ? "¡Meta cumplida!" : `Objetivo ${target}%`;
-            msg.style.color = perc >= target ? "#4CAF50" : "#94a3b8";
+            document.getElementById('statusMsg').innerText = perc >= target ? "Meta lograda" : `Objetivo ${target}%`;
         }
 
-        window.addEventListener('load', () => { loadData(); render(); });
-        window.addEventListener('storage', () => { 
-            const newDate = localStorage.getItem(SELECTED_DATE_KEY);
-            if(newDate) {
-                selectedDate = newDate;
+        window.onload = () => {
+            loadData();
+            // Re-sincronizar la semana cada vez que se abre la página
+            const syncDate = localStorage.getItem(SEL_KEY);
+            if(syncDate) {
+                selectedDate = syncDate;
                 currentWeekStart = setWeekToMonday(new Date(selectedDate + 'T12:00:00'));
             }
-            loadData(); 
-            render(); 
-        });
+            render();
+        };
     </script>
 </body>
 </html>
