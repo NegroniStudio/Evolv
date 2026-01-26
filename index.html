@@ -17,15 +17,23 @@
             --text-main: #1e293b;
             --text-muted: #64748b;
             --shadow: 0 10px 25px rgba(0,0,0,0.1);
+            --danger: #ef4444;
         }
 
         * {
             margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
-        body { background: var(--bg); color: var(--text-main); height: 100vh; overflow: hidden; }
+        body { 
+            background: var(--bg); 
+            color: var(--text-main); 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
 
         /* ---------- TOP BAR ---------- */
         .top-bar {
@@ -36,11 +44,15 @@
             border-radius: 0 0 30px 30px;
             box-shadow: var(--shadow);
             position: relative;
+            flex-shrink: 0;
+            z-index: 10;
         }
 
         .header-actions { display: flex; justify-content: space-between; align-items: center; }
         .app-name { font-size: 24px; font-weight: 800; }
         .date-text { text-align: center; margin-top: 10px; font-size: 15px; opacity: 0.9; text-transform: capitalize; }
+        
+        .menu-trigger { cursor: pointer; font-size: 20px; padding: 5px; }
 
         .stats-grid {
             display: grid; grid-template-columns: 1fr 1fr;
@@ -60,9 +72,11 @@
 
         /* ---------- MAIN CONTENT ---------- */
         .main {
-            height: calc(100% - 180px - 84px);
+            flex-grow: 1;
             display: flex; flex-direction: column;
-            align-items: center; justify-content: center; padding: 20px;
+            align-items: center; justify-content: center; 
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .chart-container {
@@ -74,23 +88,82 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* ---------- BOTTOM BAR ---------- */
-        .bottom-bar {
-            height: 84px; position: fixed; bottom: 0; left: 0; right: 0;
-            background: white; display: flex;
-            justify-content: space-around; align-items: center;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        .empty-state { text-align: center; color: var(--text-muted); padding: 40px; }
+
+        /* ---------- PANELS & OVERLAY ---------- */
+        .overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            display: none; z-index: 100;
+        }
+        .overlay.active { display: block; }
+
+        .side-panel {
+            position: fixed; top: 0; left: -100%;
+            width: 85%; max-width: 320px; height: 100%;
+            background: white; z-index: 101;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 30px 20px;
+            display: flex; flex-direction: column;
+            border-radius: 0 30px 30px 0;
+        }
+        .side-panel.active { left: 0; }
+
+        .panel-title { font-size: 22px; font-weight: 800; margin-bottom: 25px; color: var(--text-main); }
+        
+        .cat-list { flex-grow: 1; overflow-y: auto; margin-bottom: 20px; }
+        .cat-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 15px; background: #f8fafc; border-radius: 12px;
+            margin-bottom: 8px; border: 1px solid #f1f5f9;
+        }
+        .cat-item span { font-weight: 600; font-size: 14px; }
+        .btn-del-cat { color: var(--danger); cursor: pointer; padding: 5px; }
+
+        .add-cat-form { display: flex; gap: 8px; }
+        .add-cat-form input {
+            flex: 1; padding: 12px; border: 2px solid #f1f5f9;
+            border-radius: 12px; outline: none; font-size: 14px;
+        }
+        .btn-add-cat {
+            background: var(--primary); color: white; border: none;
+            padding: 0 15px; border-radius: 12px; font-weight: bold; cursor: pointer;
         }
 
-        .bottom-bar a { color: #888; font-size: 22px; text-decoration: none; padding: 10px; }
+        /* ---------- BOTTOM BAR ---------- */
+        .bottom-bar {
+            height: 84px; background: white; display: flex;
+            justify-content: space-around; align-items: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05); flex-shrink: 0;
+        }
+        .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; padding: 10px; transition: 0.2s; }
         .bottom-bar a.active { color: var(--primary); }
     </style>
 </head>
 <body>
 
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="side-panel" id="sidePanel">
+    <div class="panel-title">Categorías</div>
+    <div class="cat-list" id="categoryList">
+        <!-- Se llena dinámicamente -->
+    </div>
+    <div class="add-cat-form">
+        <input type="text" id="newCatInput" placeholder="Nueva categoría...">
+        <button class="btn-add-cat" onclick="addCategory()">+</button>
+    </div>
+    <p style="margin-top: 20px; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+        * Estas categorías aparecerán al crear nuevos hábitos en el Centro de Hábitos.
+    </p>
+</div>
+
 <div class="top-bar">
     <div class="header-actions">
-        <i class="fas fa-bars"></i>
+        <div class="menu-trigger" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
         <div class="app-name">EvolvP</div>
         <i class="fas fa-user-circle"></i>
     </div>
@@ -108,10 +181,14 @@
 </div>
 
 <div class="main">
-    <div class="chart-container">
+    <div class="chart-container" id="chartWrapper">
         <canvas id="habitChart"></canvas>
     </div>
-    <p style="margin-top:15px; color:var(--text-muted); font-size:13px;">Progreso por Categoría (Hoy)</p>
+    <div id="noDataMessage" class="empty-state" style="display: none;">
+        <i class="fas fa-chart-pie" style="font-size: 40px; margin-bottom: 10px; opacity: 0.3;"></i>
+        <p>Crea hábitos para ver tu progreso aquí.</p>
+    </div>
+    <p id="chartLabel" style="margin-top:15px; color:var(--text-muted); font-size:13px;">Progreso por Categoría (Hoy)</p>
 </div>
 
 <div class="bottom-bar">
@@ -124,79 +201,130 @@
 </div>
 
 <script>
-    // --- 1. GESTIÓN DE DATOS (LOCALSTORAGE) ---
-    // Esta función debe estar en todas tus páginas para leer la info compartida
+    const DB_KEY = 'evolvp_data';
+
+    // --- 1. GESTIÓN DE DATOS ---
     function getAppData() {
-        const data = localStorage.getItem('evolvp_data');
+        const data = localStorage.getItem(DB_KEY);
         if (!data) {
-            // Datos iniciales de ejemplo si la racha está vacía
             return {
-                habitos: [
-                    { nombre: "Correr", categoria: "Ejercicio" },
-                    { nombre: "Meditar", categoria: "Salud" },
-                    { nombre: "Leer", categoria: "Estudio" }
-                ],
-                completados: {}, // Formato: {"2023-10-27": ["Correr", "Meditar"]}
-                config: { rachaMinima: 0.65 } 
+                habitos: [],
+                completados: {}, 
+                config: { rachaMinima: 0.65 },
+                categorias: ["Salud", "Ejercicio", "Estudio", "Disciplina"] // Categorías por defecto
             };
         }
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if(!parsed.categorias) parsed.categorias = ["Salud", "Ejercicio", "Estudio", "Disciplina"];
+        return parsed;
     }
 
-    // --- 2. CÁLCULO DE RACHAS Y TOTALES ---
+    function saveAppData(data) {
+        localStorage.setItem(DB_KEY, JSON.stringify(data));
+        renderCategories();
+        renderChart();
+        calculateStats();
+    }
+
+    // --- 2. GESTIÓN DE CATEGORÍAS ---
+    function toggleMenu() {
+        document.getElementById('sidePanel').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function renderCategories() {
+        const data = getAppData();
+        const list = document.getElementById('categoryList');
+        list.innerHTML = data.categorias.map(cat => `
+            <div class="cat-item">
+                <span>${cat}</span>
+                <i class="fas fa-trash btn-del-cat" onclick="deleteCategory('${cat}')"></i>
+            </div>
+        `).join('');
+    }
+
+    function addCategory() {
+        const input = document.getElementById('newCatInput');
+        const val = input.value.trim();
+        if(!val) return;
+
+        const data = getAppData();
+        if(!data.categorias.includes(val)) {
+            data.categorias.push(val);
+            saveAppData(data);
+        }
+        input.value = '';
+    }
+
+    function deleteCategory(cat) {
+        const data = getAppData();
+        data.categorias = data.categorias.filter(c => c !== cat);
+        saveAppData(data);
+    }
+
+    // --- 3. ESTADÍSTICAS Y GRÁFICOS ---
     function calculateStats() {
         const data = getAppData();
         const hoy = new Date().toISOString().split('T')[0];
         
-        // Días totales completados (Cualquier día que tenga algo marcado)
-        const totalDias = Object.keys(data.completados).length;
-        document.getElementById('totalDoneDisplay').innerText = totalDias;
+        const diasCompletadosKeys = Object.keys(data.completados).filter(key => data.completados[key].length > 0);
+        document.getElementById('totalDoneDisplay').innerText = diasCompletadosKeys.length;
 
-        // Cálculo de Racha Consecutiva
         let streak = 0;
         let curr = new Date();
-        
+        if (data.habitos.length === 0) {
+            document.getElementById('streakDisplay').innerText = 0;
+            return;
+        }
+
         while (true) {
             const dateStr = curr.toISOString().split('T')[0];
             const realizados = data.completados[dateStr] || [];
-            const totalHabitos = data.habitos.length;
+            const totalHabitosActivos = data.habitos.filter(h => h.status === 'Activo').length;
             
-            // Si el porcentaje del día es mayor al configurado (ej 65%)
-            if (totalHabitos > 0 && (realizados.length / totalHabitos) >= data.config.rachaMinima) {
+            if (totalHabitosActivos > 0 && (realizados.length / totalHabitosActivos) >= (data.config.rachaMinima || 0.65)) {
                 streak++;
                 curr.setDate(curr.getDate() - 1);
             } else {
-                // Si es hoy y aún no completamos, no rompemos racha todavía, pero paramos de contar hacia atrás
-                if (dateStr === hoy) {
-                    curr.setDate(curr.getDate() - 1);
-                    continue; 
-                }
+                if (dateStr === hoy) { curr.setDate(curr.getDate() - 1); continue; }
                 break;
             }
         }
         document.getElementById('streakDisplay').innerText = streak;
     }
 
-    // --- 3. GRÁFICO DE ARAÑA DINÁMICO ---
     function renderChart() {
         const data = getAppData();
         const hoy = new Date().toISOString().split('T')[0];
         const hechosHoy = data.completados[hoy] || [];
 
-        // Agrupar hábitos por categoría
-        const categorias = [...new Set(data.habitos.map(h => h.categoria))];
-        const valores = categorias.map(cat => {
+        if (data.habitos.length === 0) {
+            document.getElementById('chartWrapper').style.display = 'none';
+            document.getElementById('chartLabel').style.display = 'none';
+            document.getElementById('noDataMessage').style.display = 'block';
+            return;
+        } else {
+            document.getElementById('chartWrapper').style.display = 'flex';
+            document.getElementById('chartLabel').style.display = 'block';
+            document.getElementById('noDataMessage').style.display = 'none';
+        }
+
+        // Solo mostrar categorías que TIENEN hábitos asignados para que el gráfico no se vea vacío
+        const categoriasConHabitos = [...new Set(data.habitos.map(h => h.categoria))];
+        
+        const valores = categoriasConHabitos.map(cat => {
             const habitosDeCat = data.habitos.filter(h => h.categoria === cat);
             const completadosDeCat = habitosDeCat.filter(h => hechosHoy.includes(h.nombre));
-            // Valor de 0 a 5 para el gráfico
             return habitosDeCat.length > 0 ? (completadosDeCat.length / habitosDeCat.length) * 5 : 0;
         });
 
         const ctx = document.getElementById('habitChart').getContext('2d');
-        new Chart(ctx, {
+        if (window.myRadarChart) window.myRadarChart.destroy();
+
+        window.myRadarChart = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: categorias,
+                labels: categoriasConHabitos,
                 datasets: [{
                     data: valores,
                     backgroundColor: 'rgba(76, 175, 80, 0.2)',
@@ -206,15 +334,24 @@
                 }]
             },
             options: {
-                scales: { r: { min: 0, max: 5, ticks: { display: false } } },
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0, max: 5, beginAtZero: true,
+                        ticks: { display: false },
+                        pointLabels: { font: { size: 11, weight: '600' }, color: '#64748b' }
+                    }
+                },
                 plugins: { legend: { display: false } }
             }
         });
     }
 
-    // Inicialización
     window.onload = () => {
-        document.getElementById("dateDisplay").innerText = new Date().toLocaleDateString("es-ES", {weekday:"long", day:"numeric", month:"long"});
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        document.getElementById("dateDisplay").innerText = new Date().toLocaleDateString("es-ES", options);
+        renderCategories();
         calculateStats();
         renderChart();
     };
