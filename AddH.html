@@ -78,7 +78,6 @@
 
         .date-info { font-size: 12px; color: var(--text-muted); margin-top: 5px; display: block; line-height: 1.4; }
 
-        /* BOTONES DE LA TARJETA */
         .button-grid {
             display: flex;
             gap: 10px;
@@ -147,7 +146,6 @@
             outline: none;
         }
 
-        /* DISEÑO DE OPCIONES DE RADIO */
         .option-item {
             display: flex;
             align-items: center;
@@ -163,17 +161,8 @@
         }
 
         .option-item input[type="radio"] {
-            width: 20px;
-            height: 20px;
+            width: 20px; height: 20px;
             accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .option-item span {
-            font-weight: 600;
-            font-size: 15px;
-            color: var(--text-main);
-            flex: 1;
         }
 
         .sub-input {
@@ -228,7 +217,6 @@
             z-index: 90;
         }
         .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; transition: 0.2s; }
-        .bottom-bar a:active { transform: scale(0.9); }
         .bottom-bar a.active { color: var(--primary); }
     </style>
 </head>
@@ -259,8 +247,10 @@
             <select id="newCat">
                 <option value="Salud">Salud</option>
                 <option value="Ejercicio">Ejercicio</option>
-                <option value="Mente">Mente</option>
-                <option value="Productividad">Productividad</option>
+                <option value="Estudio">Estudio</option>
+                <option value="Social">Social</option>
+                <option value="Disciplina">Disciplina</option>
+                <option value="Sueño">Sueño</option>
             </select>
         </div>
         <div class="form-group">
@@ -338,23 +328,30 @@
         <button class="btn-confirm danger" onclick="action_confirmDelete()">Confirmar Eliminación</button>
     </div>
 
-    <!-- BARRA DE TAREAS (6 ITEMS) -->
+    <!-- BARRA DE TAREAS -->
     <div class="bottom-bar">
-        <a href="index.html" title="Inicio"><i class="fas fa-house"></i></a>
-        <a href="Calendario.html" title="Calendario"><i class="fas fa-calendar"></i></a>
-        <a href="HabitosHN.html" title="Log de Hábitos"><i class="fas fa-check"></i></a>
-        <a href="Consejos.html" title="Consejos"><i class="fas fa-lightbulb"></i></a>
-        <a href="#" class="active" title="Añadir"><i class="fas fa-plus"></i></a>
-        <a href="Ajustes.html" title="Ajustes"><i class="fas fa-gear"></i></a>
+        <a href="index.html"><i class="fas fa-house"></i></a>
+        <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
+        <a href="HabitoHN.html"><i class="fas fa-check"></i></a>
+        <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
+        <a href="AddH.html" class="active"><i class="fas fa-plus"></i></a>
+        <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
     </div>
 
     <script>
-        const DB_KEY = 'evolvp_habits';
-        let habits = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+        // --- CONEXIÓN COMPARTIDA ---
+        const DB_KEY = 'evolvp_data';
+        
+        function getRawData() {
+            let raw = localStorage.getItem(DB_KEY);
+            return raw ? JSON.parse(raw) : { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
+        }
+
+        let appData = getRawData();
         let activeId = null;
 
         function save() { 
-            localStorage.setItem(DB_KEY, JSON.stringify(habits)); 
+            localStorage.setItem(DB_KEY, JSON.stringify(appData)); 
             render(); 
         }
 
@@ -402,22 +399,21 @@
                 end = document.getElementById('nRangeEnd').value;
             }
 
-            habits.push({
+            appData.habitos.push({
                 id: Date.now(),
-                name,
-                cat: document.getElementById('newCat').value,
+                nombre: name, // Cambio a 'nombre' para index.html
+                categoria: document.getElementById('newCat').value, // Cambio a 'categoria'
                 startDate: start,
                 endDate: end,
                 status: 'Activo',
-                pauseData: null,
-                logs: {}
+                pauseData: null
             });
             save(); closeAllPanels();
             document.getElementById('newName').value = '';
         }
 
         function action_confirmPause() {
-            const h = habits.find(i => i.id === activeId);
+            const h = appData.habitos.find(i => i.id === activeId);
             if(!h) return;
             const mode = document.querySelector('input[name="pOpt"]:checked').value;
             h.status = 'Pausado';
@@ -430,9 +426,9 @@
         function action_confirmDelete() {
             const mode = document.querySelector('input[name="dOpt"]:checked').value;
             if(mode === 'total' || mode === 'today+') {
-                habits = habits.filter(i => i.id !== activeId);
+                appData.habitos = appData.habitos.filter(i => i.id !== activeId);
             } else {
-                const h = habits.find(i => i.id === activeId);
+                const h = appData.habitos.find(i => i.id === activeId);
                 if(h) {
                     h.status = 'Pre-eliminacion';
                     h.deletionDate = document.getElementById('dDate').value;
@@ -442,7 +438,7 @@
         }
 
         function action_resume(id) {
-            const h = habits.find(i => i.id === id);
+            const h = appData.habitos.find(i => i.id === id);
             if(h) {
                 h.status = 'Activo';
                 h.pauseData = null;
@@ -453,21 +449,21 @@
 
         function render() {
             const list = document.getElementById('habitList');
-            if(habits.length === 0) {
+            if(appData.habitos.length === 0) {
                 list.innerHTML = `<p style="text-align:center; margin-top:50px; color:var(--text-muted)">No hay hábitos creados.</p>`;
                 return;
             }
 
-            list.innerHTML = habits.map(h => {
+            list.innerHTML = appData.habitos.map(h => {
                 const isPreDel = h.status === 'Pre-eliminacion';
                 const isPaused = h.status === 'Pausado';
 
                 return `
                 <div class="habit-card">
                     <div class="habit-info">
-                        <h3>${h.name}</h3>
+                        <h3>${h.nombre}</h3>
                         <div class="meta-tags">
-                            <span class="badge badge-cat">${h.cat}</span>
+                            <span class="badge badge-cat">${h.categoria}</span>
                             <span class="badge badge-${h.status.toLowerCase().replace('-','')}">${h.status}</span>
                         </div>
                         <span class="date-info">
@@ -477,7 +473,7 @@
                     </div>
                     <div class="button-grid">
                         ${isPreDel 
-                            ? `<button class="btn btn-undo" onclick="action_resume(${h.id})"><i class="fas fa-undo"></i> ¡Arrepentirme!</button>`
+                            ? `<button class="btn btn-undo" onclick="action_resume(${h.id})"><i class="fas fa-undo"></i> Arrepentirme</button>`
                             : isPaused
                                 ? `<button class="btn btn-resume" onclick="action_resume(${h.id})"><i class="fas fa-play"></i> Reanudar</button>`
                                 : `<button class="btn btn-main" onclick="openPanel('pausePanel', ${h.id})"><i class="fas fa-pause"></i> Pausar</button>`
