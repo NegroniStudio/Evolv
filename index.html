@@ -5,13 +5,13 @@
     <title>EvolvP - Inicio</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <!-- Librerías -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
     <style>
         :root {
             --primary: #4CAF50;
+            --primary-light: #81c784;
             --bg: #f4f6f8;
             --card: #ffffff;
             --text-main: #1e293b;
@@ -127,9 +127,18 @@
             height: 84px; background: white; display: flex;
             justify-content: space-around; align-items: center;
             box-shadow: 0 -5px 15px rgba(0,0,0,0.05); flex-shrink: 0;
+            z-index: 10;
         }
         .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; padding: 10px; transition: 0.2s; }
         .bottom-bar a.active { color: var(--primary); }
+
+        /* ---------- BARRA VERDE INFERIOR (NUEVA) ---------- */
+        .footer-accent {
+            height: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            width: 100%;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -140,10 +149,10 @@
     <div class="panel-title">Categorías</div>
     <div class="cat-list" id="categoryList"></div>
     <div class="p-4 bg-slate-50 rounded-xl mt-auto">
-        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Nueva Categoría</p>
-        <div class="flex gap-2">
-            <input type="text" id="newCatInput" class="flex-1 p-2 rounded-lg border text-sm outline-none" placeholder="Ejem: Trabajo">
-            <button onclick="addCategory()" class="bg-green-500 text-white px-3 rounded-lg font-bold">+</button>
+        <p style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">Nueva Categoría</p>
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="newCatInput" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; outline: none;" placeholder="Ejem: Trabajo">
+            <button onclick="addCategory()" style="background: #22c55e; color: white; padding: 0 12px; border-radius: 8px; font-weight: 800; border: none; cursor: pointer;">+</button>
         </div>
     </div>
 </div>
@@ -154,17 +163,17 @@
             <i class="fas fa-bars"></i>
         </div>
         <div class="app-name">EvolvP</div>
-        <i class="fas fa-user-circle text-2xl opacity-80"></i>
+        <i class="fas fa-user-circle" style="font-size: 24px; opacity: 0.8;"></i>
     </div>
     <div class="date-text" id="dateDisplay">---</div>
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-label">Racha Actual</div>
-            <div><i class="fas fa-fire text-orange-400"></i> <span id="streakDisplay">0</span></div>
+            <div><i class="fas fa-fire" style="color: #fb923c;"></i> <span id="streakDisplay">0</span></div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Días Logrados</div>
-            <div><i class="fas fa-medal text-yellow-400"></i> <span id="totalDoneDisplay">0</span></div>
+            <div><i class="fas fa-medal" style="color: #facc15;"></i> <span id="totalDoneDisplay">0</span></div>
         </div>
     </div>
 </div>
@@ -175,7 +184,7 @@
     </div>
     <div id="noDataMessage" class="empty-state" style="display: none;">
         <i class="fas fa-chart-pie" style="font-size: 40px; margin-bottom: 10px; opacity: 0.3;"></i>
-        <p class="font-bold text-sm">Configura al menos 3 categorías con hábitos para ver tu radar de evolución.</p>
+        <p style="font-weight: 800; font-size: 14px;">Configura al menos 3 categorías con hábitos para ver tu radar de evolución.</p>
     </div>
     <p id="chartLabel" style="margin-top:15px; color:var(--text-muted); font-size:12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Radar de Evolución Diaria</p>
 </div>
@@ -188,6 +197,8 @@
     <a href="AddH.html"><i class="fas fa-plus"></i></a>
     <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
 </div>
+
+<div class="footer-accent"></div>
 
 <script>
     const DB_KEY = 'evolvp_data';
@@ -243,13 +254,11 @@
         saveAppData(data);
     }
 
-    // --- LÓGICA DE ESTADÍSTICAS ---
     function calculateStats() {
         const data = getAppData();
         const hoy = new Date().toISOString().split('T')[0];
         const minRatio = data.config?.rachaMinima || 0.65;
         
-        // 1. Días Logrados Totales (todos los días que superaron el umbral, histórico)
         let diasGanadosTotales = 0;
         Object.keys(data.completados).forEach(dateKey => {
             const stats = getStatsForDate(data, dateKey);
@@ -259,31 +268,21 @@
         });
         document.getElementById('totalDoneDisplay').innerText = diasGanadosTotales;
 
-        // 2. Cálculo de Racha (Mirando hacia atrás)
         let streak = 0;
-        let iterDate = new Date(); // Empezamos hoy
+        let iterDate = new Date(); 
         
         while (true) {
             const dateStr = iterDate.toISOString().split('T')[0];
             const stats = getStatsForDate(data, dateStr);
 
             if (stats.total > 0 && stats.ratio >= minRatio) {
-                // El día fue ganado
                 streak++;
             } else {
-                // El día no fue ganado. ¿Es hoy? 
-                if (dateStr === hoy) {
-                    // Si es hoy, NO rompemos racha todavía, simplemente pasamos a ver ayer
-                } else {
-                    // Si es un día pasado y no se ganó, la racha se rompe aquí
+                if (dateStr !== hoy) {
                     break;
                 }
             }
-            
-            // Retroceder un día
             iterDate.setDate(iterDate.getDate() - 1);
-            
-            // Límite de seguridad por si acaso
             if (streak > 5000) break; 
         }
         
@@ -291,7 +290,6 @@
     }
 
     function getStatsForDate(data, dateKey) {
-        // Hábitos que estaban activos en esa fecha
         const activosEnEsaFecha = data.habitos.filter(h => {
             const isStarted = dateKey >= h.startDate;
             const isNotEnded = !h.endDate || dateKey <= h.endDate;
@@ -299,7 +297,6 @@
         });
 
         const logs = data.completados[dateKey] || {};
-        // Contamos cuántos de los activos están en el log de ese día
         const hechos = activosEnEsaFecha.filter(h => logs[h.id]);
         
         return {
@@ -314,7 +311,6 @@
         const hoy = new Date().toISOString().split('T')[0];
         const logHoy = data.completados[hoy] || {};
 
-        // Solo categorías con hábitos activos
         const catsConHabitos = data.categorias.filter(cat => 
             data.habitos.some(h => h.categoria === cat && h.status === 'Activo')
         );
@@ -387,7 +383,6 @@
 
     window.onload = initApp;
 
-    // Detectar cambios realizados en otras pantallas
     window.addEventListener('storage', (e) => {
         if (e.key === DB_KEY) initApp();
     });
