@@ -49,7 +49,6 @@
             transition: 0.2s;
         }
         
-        /* Contorno negro para el día seleccionado en la barra semanal de hábitos */
         .day-item.selected { 
             background: white; 
             color: #4CAF50; 
@@ -59,8 +58,9 @@
             outline-offset: -2px;
         }
 
+        /* Ajuste de altura del contenido principal para considerar la nueva barra inferior */
         .main-content {
-            height: calc(100% - 120px - 84px);
+            height: calc(100% - 120px - 104px);
             overflow-y: auto;
             padding: 20px;
             -webkit-overflow-scrolling: touch;
@@ -110,20 +110,47 @@
         }
         .check-circle.active { background: #4CAF50; border-color: #4CAF50; color: white; }
 
-        .bottom-bar {
-            height: 84px;
+        /* NUEVA BARRA INFERIOR CON PROTECCIÓN PARA BOTONES DEL CELULAR */
+        .bottom-nav-container {
             position: fixed;
             bottom: 0; left: 0; right: 0;
+            z-index: 100;
+        }
+
+        .bottom-bar {
+            height: 70px; /* Reducido ligeramente la altura interna */
             background: white;
             display: flex;
             justify-content: space-around;
             align-items: center;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-            z-index: 20;
-            padding-bottom: 10px;
+            padding: 0 10px;
         }
-        .bottom-bar a { color: #cbd5e1; font-size: 24px; text-decoration: none; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
-        .bottom-bar a.active { color: #4CAF50; background: #f0fdf4; border-radius: 15px; }
+
+        .bottom-bar a { 
+            color: #cbd5e1; 
+            font-size: 22px; 
+            text-decoration: none; 
+            width: 45px; 
+            height: 45px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: 0.2s;
+        }
+
+        .bottom-bar a.active { 
+            color: #4CAF50; 
+            background: #f0fdf4; 
+            border-radius: 12px; 
+        }
+
+        /* Barra verde protectora inferior */
+        .bottom-safe-area {
+            height: 24px; /* Espacio para que no molesten los botones/gestos del cel */
+            background: #4CAF50;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -154,13 +181,17 @@
         <div id="habitList" class="pb-10"></div>
     </div>
 
-    <div class="bottom-bar">
-        <a href="index.html"><i class="fas fa-house"></i></a>
-        <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
-        <a href="HabitoHN.html" class="active"><i class="fas fa-check"></i></a>
-        <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
-        <a href="AddH.html"><i class="fas fa-plus"></i></a>
-        <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
+    <!-- Contenedor de navegación inferior mejorado -->
+    <div class="bottom-nav-container">
+        <div class="bottom-bar">
+            <a href="index.html"><i class="fas fa-house"></i></a>
+            <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
+            <a href="HabitoHN.html" class="active"><i class="fas fa-check"></i></a>
+            <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
+            <a href="AddH.html"><i class="fas fa-plus"></i></a>
+            <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
+        </div>
+        <div class="bottom-safe-area"></div>
     </div>
 
     <script>
@@ -169,10 +200,7 @@
         
         let appData = { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
         
-        // 1. Obtener la fecha seleccionada del localStorage. Si no hay, usar hoy.
         let selectedDate = localStorage.getItem(SEL_KEY) || new Date().toISOString().split('T')[0];
-        
-        // 2. Establecer el inicio de la semana basándose en la fecha SELECCIONADA, no en hoy.
         let currentWeekStart = new Date(selectedDate + 'T12:00:00');
 
         function loadData() {
@@ -205,7 +233,6 @@
             render();
         };
 
-        // Navegación semanal manual
         document.getElementById('prevWeek').onclick = () => { currentWeekStart.setDate(currentWeekStart.getDate() - 7); render(); };
         document.getElementById('nextWeek').onclick = () => { currentWeekStart.setDate(currentWeekStart.getDate() + 7); render(); };
 
@@ -219,8 +246,6 @@
             const daysRow = document.getElementById('daysRow');
             const monthText = document.getElementById('monthText');
             daysRow.innerHTML = '';
-            
-            // Mostrar el mes correspondiente al inicio de la semana visible
             monthText.innerText = currentWeekStart.toLocaleDateString('es-ES', { month: 'long' });
 
             for(let i=0; i<7; i++) {
@@ -293,7 +318,6 @@
 
         window.onload = () => {
             loadData();
-            // Re-sincronizar la semana cada vez que se abre la página
             const syncDate = localStorage.getItem(SEL_KEY);
             if(syncDate) {
                 selectedDate = syncDate;
