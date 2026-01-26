@@ -240,15 +240,30 @@
             border-radius: 18px;
             transform: translateY(-5px);
         }
+
+        /* Loading State Overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
     </style>
 </head>
 <body>
+
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+    </div>
 
     <div class="top-bar">
         <div class="top-nav">
             <div class="month-selector">
                 <i class="fas fa-chevron-left month-arrow" id="prevMonth"></i>
-                <span id="monthText">Enero</span>
+                <span id="monthText">...</span>
                 <i class="fas fa-chevron-right month-arrow" id="nextMonth"></i>
             </div>
             <div class="text-xs font-black text-white opacity-60">EVOLVP</div>
@@ -283,41 +298,85 @@
         <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
     </div>
 
-    <script>
-        // --- BASE DE DATOS LOCAL STORAGE ---
-        const DB_KEY = 'evolvp_habits';
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, where, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-        function getDB() {
-            const data = localStorage.getItem(DB_KEY);
-            return data ? JSON.parse(data) : { habits: [], logs: {} };
-        }
+        // CONFIGURACIÓN
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'evolvp-habits';
 
-        function saveDB(db) {
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            render();
-        }
-
-        let currentWeekStart = new Date(); 
-        function setWeekToMonday(date) {
-            const day = date.getDay();
-            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-            date.setDate(diff);
-            return date;
-        }
-        setWeekToMonday(currentWeekStart);
-
+        // ESTADO GLOBAL
+        let currentUser = null;
+        let globalDB = { habits: [], logs: {} };
         let selectedDate = new Date().toISOString().split('T')[0];
+        let currentWeekStart = new Date();
 
-        // --- ACCIONES ---
-        window.toggleHabit = (habitId) => {
-            const db = getDB();
-            if (!db.logs[selectedDate]) db.logs[selectedDate] = {};
+        function setWeekToMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            d.setDate(diff);
+            d.setHours(0,0,0,0);
+            return d;
+        }
+        currentWeekStart = setWeekToMonday(currentWeekStart);
+
+        // AUTENTICACIÓN
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                initSync();
+            } else {
+                signInAnonymously(auth);
+            }
+        });
+
+        // SINCRONIZACIÓN CLOUD
+        function initSync() {
+            if (!currentUser) return;
+
+            // Escuchar el documento principal del usuario
+            // Ruta: /artifacts/{appId}/users/{userId}/data/main
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'habitsMain');
             
-            db.logs[selectedDate][habitId] = !db.logs[selectedDate][habitId];
-            saveDB(db);
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    globalDB = docSnap.data();
+                } else {
+                    // Si no existe, crear estructura básica
+                    globalDB = { habits: [], logs: {} };
+                }
+                document.getElementById('loading-overlay').style.display = 'none';
+                render();
+            }, (error) => {
+                console.error("Error sync:", error);
+            });
+        }
+
+        async function pushDB() {
+            if (!currentUser) return;
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'habitsMain');
+            try {
+                await setDoc(docRef, globalDB);
+            } catch (e) {
+                console.error("Error saving:", e);
+            }
+        }
+
+        // ACCIONES
+        window.toggleHabit = async (habitId) => {
+            if (!globalDB.logs[selectedDate]) globalDB.logs[selectedDate] = {};
+            globalDB.logs[selectedDate][habitId] = !globalDB.logs[selectedDate][habitId];
+            await pushDB();
         };
 
-        // --- NAVEGACIÓN ---
+        // NAVEGACIÓN
         document.getElementById('prevWeek').onclick = () => {
             currentWeekStart.setDate(currentWeekStart.getDate() - 7);
             render();
@@ -328,24 +387,23 @@
         };
         document.getElementById('prevMonth').onclick = () => {
             currentWeekStart.setMonth(currentWeekStart.getMonth() - 1);
-            setWeekToMonday(currentWeekStart);
+            currentWeekStart = setWeekToMonday(currentWeekStart);
             render();
         };
         document.getElementById('nextMonth').onclick = () => {
             currentWeekStart.setMonth(currentWeekStart.getMonth() + 1);
-            setWeekToMonday(currentWeekStart);
+            currentWeekStart = setWeekToMonday(currentWeekStart);
             render();
         };
 
-        // --- RENDERIZADO ---
+        // RENDERIZADO
         function render() {
-            const db = getDB();
-            renderWeek(db);
-            renderHabits(db);
-            updateProgress(db);
+            renderWeek();
+            renderHabits();
+            updateProgress();
         }
 
-        function renderWeek(db) {
+        function renderWeek() {
             const daysRow = document.getElementById('daysRow');
             const monthText = document.getElementById('monthText');
             daysRow.innerHTML = '';
@@ -358,9 +416,10 @@
                 const dKey = d.toISOString().split('T')[0];
                 const isSelected = dKey === selectedDate;
 
-                const dayLog = db.logs[dKey] || {};
-                const doneCount = db.habits.filter(h => dayLog[h.id]).length;
-                const perc = db.habits.length > 0 ? (doneCount/db.habits.length)*100 : 0;
+                const dayLog = globalDB.logs[dKey] || {};
+                const habitsList = globalDB.habits || [];
+                const doneCount = habitsList.filter(h => dayLog[h.id]).length;
+                const perc = habitsList.length > 0 ? (doneCount/habitsList.length)*100 : 0;
 
                 const dayItem = document.createElement('div');
                 dayItem.className = `day-item ${isSelected ? 'selected' : ''} ${perc >= 65 ? 'has-success' : ''}`;
@@ -373,22 +432,23 @@
             }
         }
 
-        function renderHabits(db) {
+        function renderHabits() {
             const list = document.getElementById('habitList');
-            const dayLog = db.logs[selectedDate] || {};
+            const habits = globalDB.habits || [];
+            const dayLog = globalDB.logs[selectedDate] || {};
             list.innerHTML = '';
 
-            if(db.habits.length === 0) {
+            if(habits.length === 0) {
                 list.innerHTML = `<div class="text-center py-10"><i class="fas fa-clipboard-list text-4xl text-slate-200 mb-3"></i><p class="text-slate-400 font-medium">No hay hábitos creados aún.</p></div>`;
                 return;
             }
 
-            db.habits.forEach(h => {
+            habits.forEach(h => {
                 const isDone = dayLog[h.id];
                 const item = document.createElement('div');
                 item.className = 'habit-item';
                 item.innerHTML = `
-                    <div class="flex-1" onclick="toggleHabit('${h.id}')">
+                    <div class="flex-1 cursor-pointer" onclick="toggleHabit('${h.id}')">
                         <p class="font-bold text-slate-700">${h.name}</p>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">${h.cat || 'General'}</p>
                     </div>
@@ -403,11 +463,17 @@
             document.getElementById('dateLabel').innerText = dObj.toLocaleDateString('es-ES', { day:'numeric', month:'short' });
         }
 
-        function updateProgress(db) {
-            if(db.habits.length === 0) return;
-            const dayLog = db.logs[selectedDate] || {};
-            const done = db.habits.filter(h => dayLog[h.id]).length;
-            const perc = Math.round((done / db.habits.length) * 100);
+        function updateProgress() {
+            const habits = globalDB.habits || [];
+            if(habits.length === 0) {
+                document.getElementById('percText').innerText = '0%';
+                document.getElementById('circProgress').style.setProperty('--p', '0deg');
+                return;
+            }
+            
+            const dayLog = globalDB.logs[selectedDate] || {};
+            const done = habits.filter(h => dayLog[h.id]).length;
+            const perc = Math.round((done / habits.length) * 100);
 
             document.getElementById('percText').innerText = perc + '%';
             document.getElementById('circProgress').style.setProperty('--p', (perc * 3.6) + 'deg');
@@ -421,9 +487,6 @@
                 msg.style.color = "#94a3b8";
             }
         }
-
-        // Iniciar
-        render();
     </script>
 </body>
 </html>
