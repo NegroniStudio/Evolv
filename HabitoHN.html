@@ -7,8 +7,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        html, body { height: 100%; overflow: hidden; background: #f8fafc; }
+        :root {
+            --bg-body: #f8fafc;
+            --card-bg: white;
+            --text-main: #1e293b; /* slate-800 */
+            --text-sub: #94a3b8;  /* slate-400 */
+            --border-color: #e2e8f0;
+            --bottom-bar-bg: white;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #f1f5f9;
+            --text-sub: #64748b;
+            --border-color: #334155;
+            --bottom-bar-bg: #1e1e1e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; transition: background 0.3s, border-color 0.3s; }
+        html, body { height: 100%; overflow: hidden; background: var(--bg-body); color: var(--text-main); }
 
         .top-bar {
             height: 120px;
@@ -58,16 +76,15 @@
             outline-offset: -2px;
         }
 
-        /* Ajuste de altura del contenido principal para considerar la nueva barra inferior */
         .main-content {
-            height: calc(100% - 120px - 104px);
+            height: calc(100% - 120px - 84px);
             overflow-y: auto;
             padding: 20px;
             -webkit-overflow-scrolling: touch;
         }
 
         .progress-card {
-            background: white;
+            background: var(--card-bg);
             padding: 18px;
             border-radius: 20px;
             margin-bottom: 20px;
@@ -84,13 +101,15 @@
             background: conic-gradient(#4CAF50 var(--p), #eee 0deg);
             display: flex; align-items: center; justify-content: center;
         }
+        [data-theme="dark"] .circular-progress { background: conic-gradient(#4CAF50 var(--p), #333 0deg); }
+
         .circular-progress::before {
-            content: ""; position: absolute; width: 42px; height: 42px; background: white; border-radius: 50%;
+            content: ""; position: absolute; width: 42px; height: 42px; background: var(--card-bg); border-radius: 50%;
         }
         .circular-progress span { position: relative; font-size: 12px; font-weight: 800; color: #4CAF50; }
 
         .habit-item {
-            background: white;
+            background: var(--card-bg);
             padding: 16px;
             border-radius: 16px;
             margin-bottom: 10px;
@@ -98,59 +117,41 @@
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            border: 1px solid transparent;
         }
+        [data-theme="dark"] .habit-item { border-color: var(--border-color); }
 
         .check-circle {
             width: 34px; height: 34px;
             border-radius: 10px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             transition: 0.2s;
+            color: var(--text-sub);
         }
         .check-circle.active { background: #4CAF50; border-color: #4CAF50; color: white; }
 
-        /* NUEVA BARRA INFERIOR CON PROTECCIÓN PARA BOTONES DEL CELULAR */
-        .bottom-nav-container {
+        .bottom-bar {
+            height: 84px;
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            z-index: 100;
-        }
-
-        .bottom-bar {
-            height: 70px; /* Reducido ligeramente la altura interna */
-            background: white;
+            background: var(--bottom-bar-bg);
             display: flex;
             justify-content: space-around;
             align-items: center;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-            padding: 0 10px;
+            z-index: 20;
+            padding-bottom: 10px;
+            border-top: 1px solid var(--border-color);
         }
+        .bottom-bar a { color: #cbd5e1; font-size: 24px; text-decoration: none; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
+        .bottom-bar a.active { color: #4CAF50; background: rgba(76, 175, 80, 0.1); border-radius: 15px; }
 
-        .bottom-bar a { 
-            color: #cbd5e1; 
-            font-size: 22px; 
-            text-decoration: none; 
-            width: 45px; 
-            height: 45px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            transition: 0.2s;
-        }
-
-        .bottom-bar a.active { 
-            color: #4CAF50; 
-            background: #f0fdf4; 
-            border-radius: 12px; 
-        }
-
-        /* Barra verde protectora inferior */
-        .bottom-safe-area {
-            height: 24px; /* Espacio para que no molesten los botones/gestos del cel */
-            background: #4CAF50;
-            width: 100%;
-        }
+        /* Ajustes de color de texto específicos para variables */
+        .text-slate-800 { color: var(--text-main) !important; }
+        .text-slate-700 { color: var(--text-main) !important; }
+        .text-slate-400 { color: var(--text-sub) !important; }
     </style>
 </head>
 <body>
@@ -181,27 +182,32 @@
         <div id="habitList" class="pb-10"></div>
     </div>
 
-    <!-- Contenedor de navegación inferior mejorado -->
-    <div class="bottom-nav-container">
-        <div class="bottom-bar">
-            <a href="index.html"><i class="fas fa-house"></i></a>
-            <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
-            <a href="HabitoHN.html" class="active"><i class="fas fa-check"></i></a>
-            <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
-            <a href="AddH.html"><i class="fas fa-plus"></i></a>
-            <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
-        </div>
-        <div class="bottom-safe-area"></div>
+    <div class="bottom-bar">
+        <a href="index.html"><i class="fas fa-house"></i></a>
+        <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
+        <a href="HabitoHN.html" class="active"><i class="fas fa-check"></i></a>
+        <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
+        <a href="AddH.html"><i class="fas fa-plus"></i></a>
+        <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
     </div>
 
     <script>
         const DB_KEY = 'evolvp_data';
         const SEL_KEY = 'evolvp_selected_date';
+        const THEME_KEY = 'evolvp_theme';
         
         let appData = { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
-        
         let selectedDate = localStorage.getItem(SEL_KEY) || new Date().toISOString().split('T')[0];
         let currentWeekStart = new Date(selectedDate + 'T12:00:00');
+
+        function applyTheme() {
+            const theme = localStorage.getItem(THEME_KEY);
+            if(theme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+            } else {
+                document.body.removeAttribute('data-theme');
+            }
+        }
 
         function loadData() {
             const raw = localStorage.getItem(DB_KEY);
@@ -317,6 +323,7 @@
         }
 
         window.onload = () => {
+            applyTheme();
             loadData();
             const syncDate = localStorage.getItem(SEL_KEY);
             if(syncDate) {
