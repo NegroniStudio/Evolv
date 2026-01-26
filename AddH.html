@@ -16,6 +16,7 @@
             --shadow: 0 4px 12px rgba(0,0,0,0.08);
             --warning: #f59e0b;
             --danger: #ef4444;
+            --info: #3b82f6;
             --slate: #475569;
             --border: #f1f5f9;
         }
@@ -55,7 +56,7 @@
             flex-grow: 1;
             overflow-y: auto;
             padding: 20px;
-            padding-bottom: 160px; /* Espacio para el botón flotante y la barra elevada */
+            padding-bottom: 180px;
         }
 
         .habit-card {
@@ -64,14 +65,13 @@
             padding: 20px;
             margin-bottom: 16px;
             box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            position: relative;
+            border: 1px solid var(--border);
         }
 
         .habit-info h3 { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
         
-        .meta-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .meta-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
         
         .badge {
             font-size: 10px;
@@ -82,31 +82,38 @@
         }
         .badge-cat { background: var(--border); color: var(--slate); }
         .badge-activo { background: #dcfce7; color: var(--primary); }
+        .badge-preactivo { background: #dbeafe; color: var(--info); }
         .badge-pausado { background: #fef3c7; color: var(--warning); }
+        .badge-pre-elim { background: #fee2e2; color: var(--danger); }
+
+        .dates-info { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
 
         .button-grid {
             display: flex;
             gap: 10px;
             border-top: 1px solid var(--border);
             padding-top: 15px;
+            flex-wrap: wrap;
         }
 
         .btn {
-            height: 46px;
+            height: 40px;
             border: none;
-            border-radius: 14px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 13px;
             font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            transition: 0.2s;
+            gap: 6px;
+            padding: 0 15px;
         }
 
-        .btn-main { flex: 1; background: var(--border); color: var(--text-main); }
-        .btn-delete { width: 46px; background: #fff1f2; color: var(--danger); border: 1px solid #fecaca; }
+        .btn-main { background: var(--border); color: var(--text-main); }
+        .btn-pause { background: #fffbeb; color: var(--warning); border: 1px solid #fde68a; }
+        .btn-delete { background: #fff1f2; color: var(--danger); border: 1px solid #fecaca; }
+        .btn-action { background: var(--primary); color: white; }
 
         .overlay {
             position: fixed; inset: 0;
@@ -120,7 +127,7 @@
             position: fixed; bottom: -100%; left: 0; right: 0;
             background: var(--card-bg);
             border-radius: 32px 32px 0 0;
-            padding: 30px 24px 50px 24px;
+            padding: 30px 24px 40px 24px;
             transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
             z-index: 201;
             max-height: 90vh;
@@ -128,22 +135,42 @@
         }
         .panel.active { bottom: 0; }
 
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--text-muted); }
         
         input, select {
-            width: 100%; padding: 15px; border-radius: 14px;
+            width: 100%; padding: 12px; border-radius: 12px;
             border: 2px solid var(--border); background: var(--bg);
-            color: var(--text-main); font-size: 16px; outline: none;
+            color: var(--text-main); font-size: 15px; outline: none;
         }
+
+        .radio-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .radio-option {
+            display: flex; flex-direction: column; gap: 8px;
+            padding: 14px; border: 2px solid var(--border);
+            border-radius: 16px; cursor: pointer;
+        }
+        .radio-header { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
+        .radio-option input[type="radio"] { width: 18px; height: 18px; cursor: pointer; }
+        
+        .inline-date-container { 
+            display: none; 
+            margin-top: 8px; 
+            padding-left: 28px; 
+            animation: fadeIn 0.3s ease;
+        }
+        .inline-date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
         .btn-confirm {
             background: var(--primary); color: white; width: 100%;
             padding: 18px; border-radius: 18px; border: none;
             font-size: 16px; font-weight: 800; cursor: pointer;
+            margin-top: 10px;
         }
+        .btn-cancel { background: var(--border); color: var(--text-main); margin-top: 10px; }
 
-        /* FAB (Botón Añadir) elevado */
         .add-btn {
             position: fixed; right: 20px; bottom: 110px;
             width: 64px; height: 64px; border-radius: 22px;
@@ -153,36 +180,22 @@
             z-index: 90; border: none;
         }
 
-        /* NAVEGACIÓN ELEVADA Y BARRA VERDE */
         .bottom-nav-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            display: flex; flex-direction: column;
         }
-
         .bottom-bar {
-            height: 70px;
-            background: var(--card-bg);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-            border-top: 1px solid var(--border);
+            height: 70px; background: var(--card-bg);
+            display: flex; justify-content: space-around; align-items: center;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-top: 1px solid var(--border);
             border-radius: 20px 20px 0 0;
         }
-
         .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
         .bottom-bar a.active { color: var(--primary); background: rgba(76, 175, 80, 0.1); border-radius: 15px; }
+        .safe-area-spacer { height: 25px; background: #4CAF50; width: 100%; }
 
-        .safe-area-spacer {
-            height: 25px; 
-            background: #4CAF50;
-            width: 100%;
-        }
+        .confirm-dialog { text-align: center; }
+        .confirm-dialog i { font-size: 40px; margin-bottom: 15px; }
     </style>
 </head>
 
@@ -210,45 +223,162 @@
             <label>Categoría</label>
             <select id="newCat"></select>
         </div>
+        <label>¿Cuándo empieza?</label>
+        <div class="radio-group">
+            <div class="radio-option">
+                <label class="radio-header">
+                    <input type="radio" name="createMode" value="today" checked onclick="toggleCreateDates()"> Hoy en adelante
+                </label>
+            </div>
+            <div class="radio-option">
+                <label class="radio-header">
+                    <input type="radio" name="createMode" value="only_today" onclick="toggleCreateDates()"> Solo por hoy
+                </label>
+            </div>
+            <div class="radio-option">
+                <label class="radio-header">
+                    <input type="radio" name="createMode" value="specific" onclick="toggleCreateDates()"> Un día en específico
+                </label>
+                <div id="dateSpecific" class="inline-date-container">
+                    <input type="date" id="createStartDate">
+                </div>
+            </div>
+            <div class="radio-option">
+                <label class="radio-header">
+                    <input type="radio" name="createMode" value="range" onclick="toggleCreateDates()"> Rango de fechas
+                </label>
+                <div id="dateRange" class="inline-date-container">
+                    <div class="inline-date-grid">
+                        <input type="date" id="rangeStart" placeholder="Inicio">
+                        <input type="date" id="rangeEnd" placeholder="Fin">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <button class="btn-confirm" onclick="action_save()">Crear Hábito</button>
+    </div>
+
+    <!-- PANEL EDITAR -->
+    <div class="panel" id="editPanel">
+        <h3 style="text-align: center; margin-bottom: 25px;">Editar Hábito</h3>
+        <input type="hidden" id="editId">
+        <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" id="editName">
+        </div>
+        <div class="form-group">
+            <label>Categoría</label>
+            <select id="editCat"></select>
+        </div>
+        <button class="btn-confirm" onclick="action_update()">Guardar Cambios</button>
+    </div>
+
+    <!-- PANEL PAUSA -->
+    <div class="panel" id="pausePanel">
+        <h3 style="text-align: center; margin-bottom: 20px;">Pausar Hábito</h3>
+        <input type="hidden" id="pauseId">
+        <div class="radio-group">
+            <div class="radio-option">
+                <label class="radio-header">
+                    <input type="radio" name="pauseMode" value="only_today" checked onclick="togglePauseDates()"> Solo por hoy
+                </label>
+            </div>
+            <div class="radio-option">
+                <label class="radio-header">
+                    <input type="radio" name="pauseMode" value="indefinite" onclick="togglePauseDates()"> Indefinidamente (Hoy en adelante)
+                </label>
+            </div>
+            <div class="radio-option">
+                <label class="radio-header">
+                    <input type="radio" name="pauseMode" value="range" onclick="togglePauseDates()"> Desde una fecha hasta otra
+                </label>
+                <div id="pauseRange" class="inline-date-container">
+                    <div class="inline-date-grid">
+                        <input type="date" id="pauseStart" placeholder="Desde">
+                        <input type="date" id="pauseEnd" placeholder="Hasta">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-confirm" style="background:var(--warning)" onclick="action_pause()">Confirmar Pausa</button>
+    </div>
+
+    <!-- PANEL ELIMINAR -->
+    <div class="panel" id="deletePanel">
+        <h3 style="text-align: center; margin-bottom: 20px;">Eliminar Hábito</h3>
+        <input type="hidden" id="deleteId">
+        <div class="radio-group">
+            <div class="radio-option">
+                <label class="radio-header">
+                    <input type="radio" name="deleteMode" value="from_today" checked onclick="toggleDeleteDates()"> Eliminar desde hoy en adelante
+                </label>
+            </div>
+            <div class="radio-option">
+                <label class="radio-header">
+                    <input type="radio" name="deleteMode" value="specific_date" onclick="toggleDeleteDates()"> Eliminar a partir de una fecha
+                </label>
+                <div id="deleteSpecific" class="inline-date-container">
+                    <input type="date" id="deleteTargetDate">
+                </div>
+            </div>
+            <div class="radio-option" style="border-color: var(--danger)">
+                <label class="radio-header">
+                    <input type="radio" name="deleteMode" value="complete" onclick="toggleDeleteDates()"> Eliminar completamente su rastro
+                </label>
+            </div>
+        </div>
+        <button class="btn-confirm" style="background:var(--danger)" onclick="action_delete()">Eliminar</button>
+    </div>
+
+    <!-- PANEL CONFIRMACIÓN SIMPLE -->
+    <div class="panel" id="confirmPanel">
+        <div class="confirm-dialog" id="confirmContent"></div>
     </div>
 
     <div class="bottom-nav-container">
         <div class="bottom-bar">
-            <a href="index.html"><i class="fas fa-house"></i></a>
-            <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
-            <a href="HabitoHN.html"><i class="fas fa-check"></i></a>
-            <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
-            <a href="AddH.html" class="active"><i class="fas fa-plus"></i></a>
-            <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
+            <a href="#"><i class="fas fa-house"></i></a>
+            <a href="#"><i class="fas fa-calendar"></i></a>
+            <a href="#"><i class="fas fa-check"></i></a>
+            <a href="#"><i class="fas fa-lightbulb"></i></a>
+            <a href="#" class="active"><i class="fas fa-plus"></i></a>
+            <a href="#"><i class="fas fa-gear"></i></a>
         </div>
         <div class="safe-area-spacer"></div>
     </div>
 
     <script>
-        const DB_KEY = 'evolvp_data';
-        const THEME_KEY = 'evolvp_theme';
+        const DB_KEY = 'evolvp_habits_v3';
         
         function getRawData() {
             let raw = localStorage.getItem(DB_KEY);
             const defaultCats = ["Salud", "Ejercicio", "Estudio", "Disciplina"];
-            if (!raw) return { habitos: [], completados: {}, config: { rachaMinima: 0.65 }, categorias: defaultCats };
-            let data = JSON.parse(raw);
-            if (!data.categorias) data.categorias = defaultCats;
-            return data;
+            if (!raw) return { habitos: [], categorias: defaultCats };
+            return JSON.parse(raw);
         }
 
         let appData = getRawData();
 
-        function save() { 
-            localStorage.setItem(DB_KEY, JSON.stringify(appData)); 
-            render(); 
+        function save() {
+            localStorage.setItem(DB_KEY, JSON.stringify(appData));
+            render();
         }
 
-        function openPanel(id) {
-            loadCategoriesIntoSelect();
+        function openPanel(id, extraId = null) {
+            loadCategories();
             document.getElementById('overlay').classList.add('active');
             document.getElementById(id).classList.add('active');
+            if(extraId) {
+                if(id === 'pausePanel') document.getElementById('pauseId').value = extraId;
+                if(id === 'deletePanel') document.getElementById('deleteId').value = extraId;
+                if(id === 'editPanel') {
+                    const h = appData.habitos.find(x => x.id == extraId);
+                    document.getElementById('editId').value = extraId;
+                    document.getElementById('editName').value = h.nombre;
+                    document.getElementById('editCat').value = h.categoria;
+                }
+            }
         }
 
         function closeAllPanels() {
@@ -256,60 +386,206 @@
             document.getElementById('overlay').classList.remove('active');
         }
 
-        function loadCategoriesIntoSelect() {
-            const select = document.getElementById('newCat');
-            select.innerHTML = appData.categorias.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        function loadCategories() {
+            const html = appData.categorias.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            document.getElementById('newCat').innerHTML = html;
+            document.getElementById('editCat').innerHTML = html;
+        }
+
+        function toggleCreateDates() {
+            const mode = document.querySelector('input[name="createMode"]:checked').value;
+            document.getElementById('dateSpecific').style.display = (mode === 'specific') ? 'block' : 'none';
+            document.getElementById('dateRange').style.display = (mode === 'range') ? 'block' : 'none';
+        }
+
+        function togglePauseDates() {
+            const mode = document.querySelector('input[name="pauseMode"]:checked').value;
+            document.getElementById('pauseRange').style.display = (mode === 'range') ? 'block' : 'none';
+        }
+
+        function toggleDeleteDates() {
+            const mode = document.querySelector('input[name="deleteMode"]:checked').value;
+            document.getElementById('deleteSpecific').style.display = (mode === 'specific_date') ? 'block' : 'none';
         }
 
         function action_save() {
             const name = document.getElementById('newName').value;
+            const cat = document.getElementById('newCat').value;
+            const mode = document.querySelector('input[name="createMode"]:checked').value;
             if(!name) return;
+
+            let startDate = new Date().toISOString().split('T')[0];
+            let endDate = null;
+            let status = 'Activo';
+
+            if(mode === 'only_today') {
+                endDate = startDate;
+            } else if(mode === 'specific') {
+                startDate = document.getElementById('createStartDate').value;
+                if(!startDate) return;
+            } else if(mode === 'range') {
+                startDate = document.getElementById('rangeStart').value;
+                endDate = document.getElementById('rangeEnd').value;
+                if(!startDate || !endDate) return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            if(startDate > today) status = 'Preactivo';
+
             appData.habitos.push({
                 id: Date.now(),
                 nombre: name,
-                categoria: document.getElementById('newCat').value,
-                startDate: new Date().toISOString().split('T')[0],
-                status: 'Activo'
+                categoria: cat,
+                startDate,
+                endDate,
+                status,
+                pauseData: null,
+                deleteSchedule: null
             });
-            save(); closeAllPanels();
+
+            save();
+            closeAllPanels();
             document.getElementById('newName').value = '';
         }
 
-        function deleteHabit(id) {
-            // Reemplazo de confirm por un modal nativo o simple confirmación de JS
-            if(confirm("¿Eliminar este hábito?")) {
-                appData.habitos = appData.habitos.filter(h => h.id !== id);
+        function action_update() {
+            const id = document.getElementById('editId').value;
+            const h = appData.habitos.find(x => x.id == id);
+            h.nombre = document.getElementById('editName').value;
+            h.categoria = document.getElementById('editCat').value;
+            save();
+            closeAllPanels();
+        }
+
+        function action_pause() {
+            const id = document.getElementById('pauseId').value;
+            const mode = document.querySelector('input[name="pauseMode"]:checked').value;
+            const h = appData.habitos.find(x => x.id == id);
+
+            confirmAction("¿Deseas pausar este hábito?", () => {
+                h.status = 'Pausado';
+                h.pauseData = {
+                    mode,
+                    start: document.getElementById('pauseStart').value || new Date().toISOString().split('T')[0],
+                    end: document.getElementById('pauseEnd').value || null
+                };
                 save();
-            }
+                closeAllPanels();
+            });
+        }
+
+        function action_resume(id) {
+            const h = appData.habitos.find(x => x.id == id);
+            h.status = 'Activo';
+            h.pauseData = null;
+            save();
+        }
+
+        function action_activate_now(id) {
+            const h = appData.habitos.find(x => x.id == id);
+            confirmAction("¿Activar este hábito inmediatamente?", () => {
+                h.status = 'Activo';
+                h.startDate = new Date().toISOString().split('T')[0];
+                save();
+                closeAllPanels();
+            });
+        }
+
+        function action_delete() {
+            const id = document.getElementById('deleteId').value;
+            const mode = document.querySelector('input[name="deleteMode"]:checked').value;
+            const h = appData.habitos.find(x => x.id == id);
+
+            confirmAction("¿Confirmas la eliminación?", () => {
+                if(mode === 'complete') {
+                    appData.habitos = appData.habitos.filter(x => x.id != id);
+                } else {
+                    const target = (mode === 'from_today') ? new Date().toISOString().split('T')[0] : document.getElementById('deleteTargetDate').value;
+                    h.status = 'Pre-Eliminación';
+                    h.deleteSchedule = target;
+                }
+                save();
+                closeAllPanels();
+            });
+        }
+
+        function cancelElimination(id) {
+            const h = appData.habitos.find(x => x.id == id);
+            confirmAction("¿Cancelar eliminación programada?", () => {
+                h.status = 'Activo';
+                h.deleteSchedule = null;
+                save();
+                closeAllPanels();
+            });
+        }
+
+        function confirmAction(text, callback) {
+            const container = document.getElementById('confirmContent');
+            container.innerHTML = `
+                <i class="fas fa-question-circle" style="color:var(--primary)"></i>
+                <h3>Confirmar Acción</h3>
+                <p style="margin: 15px 0; color:var(--text-muted)">${text}</p>
+                <button class="btn-confirm" id="btnYes">Sí, confirmar</button>
+                <button class="btn-confirm btn-cancel" onclick="closeAllPanels()">No, volver</button>
+            `;
+            openPanel('confirmPanel');
+            document.getElementById('btnYes').onclick = callback;
         }
 
         function render() {
             const list = document.getElementById('habitList');
             if(appData.habitos.length === 0) {
-                list.innerHTML = `<p style="text-align:center; margin-top:50px; color:var(--text-muted)">No hay hábitos. ¡Pulsa + para crear uno!</p>`;
+                list.innerHTML = `<div style="text-align:center; margin-top:100px; opacity:0.5">
+                    <i class="fas fa-seedling" style="font-size:48px; margin-bottom:15px"></i>
+                    <p>No hay hábitos registrados.</p>
+                </div>`;
                 return;
             }
-            list.innerHTML = appData.habitos.map(h => `
+
+            list.innerHTML = appData.habitos.map(h => {
+                let badgeClass = 'badge-activo';
+                if(h.status === 'Preactivo') badgeClass = 'badge-preactivo';
+                if(h.status === 'Pausado') badgeClass = 'badge-pausado';
+                if(h.status === 'Pre-Eliminación') badgeClass = 'badge-pre-elim';
+
+                return `
                 <div class="habit-card">
                     <div class="habit-info">
                         <h3>${h.nombre}</h3>
                         <div class="meta-tags">
                             <span class="badge badge-cat">${h.categoria}</span>
-                            <span class="badge badge-activo">${h.status}</span>
+                            <span class="badge ${badgeClass}">${h.status}</span>
+                        </div>
+                        <div class="dates-info">
+                            <i class="far fa-calendar-alt"></i> Inicio: ${h.startDate} 
+                            ${h.endDate ? ` <i class="fas fa-arrow-right"></i> Fin: ${h.endDate}` : ''}
+                            ${h.deleteSchedule ? `<br><b style="color:var(--danger)">Eliminación programada: ${h.deleteSchedule}</b>` : ''}
                         </div>
                     </div>
+
                     <div class="button-grid">
-                        <button class="btn btn-main"><i class="fas fa-edit"></i> Editar</button>
-                        <button class="btn btn-delete" onclick="deleteHabit(${h.id})"><i class="fas fa-trash"></i></button>
+                        ${h.status === 'Pre-Eliminación' ? `
+                            <button class="btn btn-action" onclick="cancelElimination(${h.id})">Cancelar Eliminación</button>
+                            <button class="btn btn-delete" onclick="openPanel('deletePanel', ${h.id})"><i class="fas fa-trash"></i></button>
+                        ` : h.status === 'Pausado' ? `
+                            <button class="btn btn-action" onclick="action_resume(${h.id})">Reanudar</button>
+                            <button class="btn btn-delete" onclick="openPanel('deletePanel', ${h.id})"><i class="fas fa-trash"></i></button>
+                        ` : h.status === 'Preactivo' ? `
+                            <button class="btn btn-main" onclick="openPanel('editPanel', ${h.id})"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="btn btn-action" onclick="action_activate_now(${h.id})"><i class="fas fa-play"></i> Activar Ahora</button>
+                            <button class="btn btn-delete" onclick="openPanel('deletePanel', ${h.id})"><i class="fas fa-trash"></i></button>
+                        ` : `
+                            <button class="btn btn-main" onclick="openPanel('editPanel', ${h.id})"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="btn btn-pause" onclick="openPanel('pausePanel', ${h.id})"><i class="fas fa-pause"></i> Pausar</button>
+                            <button class="btn btn-delete" onclick="openPanel('deletePanel', ${h.id})"><i class="fas fa-trash"></i></button>
+                        `}
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         window.onload = () => {
-            const theme = localStorage.getItem(THEME_KEY);
-            if(theme === 'dark') document.body.setAttribute('data-theme', 'dark');
-            appData = getRawData();
             render();
         };
     </script>
