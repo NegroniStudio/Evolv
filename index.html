@@ -1,326 +1,223 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>EvolvP</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>EvolvP - Inicio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <!-- Librerías -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-<style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:system-ui,sans-serif;
-}
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --bg: #f4f6f8;
+            --card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
 
-html, body{
-  height:100%;
-  overflow:hidden; /* 🚫 NO SCROLL */
-}
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-body{
-  background:#f4f6f8;
-}
+        body { background: var(--bg); color: var(--text-main); height: 100vh; overflow: hidden; }
 
-/* ---------- TOP BAR ---------- */
-.top-bar{
-  height:150px;
-  background:linear-gradient(135deg,#4CAF50,#66bb6a);
-  color:white;
-  padding:18px;
-  border-radius:0 0 24px 24px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.2);
-  position:relative;
-}
+        /* ---------- TOP BAR ---------- */
+        .top-bar {
+            height: 180px;
+            background: linear-gradient(135deg, #4CAF50, #66bb6a);
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 30px 30px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
 
-.menu-btn{
-  position:absolute;
-  left:16px;
-  top:16px;
-  font-size:22px;
-  cursor:pointer;
-}
+        .header-actions { display: flex; justify-content: space-between; align-items: center; }
+        .app-name { font-size: 24px; font-weight: 800; }
+        .date-text { text-align: center; margin-top: 10px; font-size: 15px; opacity: 0.9; text-transform: capitalize; }
 
-.app-name{
-  text-align:center;
-  font-size:22px;
-  font-weight:800;
-}
+        .stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 15px; margin-top: 20px;
+        }
 
-.date{
-  text-align:center;
-  font-size:14px;
-  opacity:.9;
-  margin-top:4px;
-}
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px; border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; border: 1px solid rgba(255, 255, 255, 0.3);
+        }
 
-.stats{
-  display:flex;
-  justify-content:space-around;
-  margin-top:14px;
-}
+        .stat-card i { font-size: 20px; }
+        .stat-card span { font-weight: 700; font-size: 20px; }
 
-.stat{
-  text-align:center;
-  font-size:24px;
-  font-weight:700;
-}
+        /* ---------- MAIN CONTENT ---------- */
+        .main {
+            height: calc(100% - 180px - 84px);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px;
+        }
 
-.stat i{
-  display:block;
-  font-size:28px;
-}
+        .chart-container {
+            background: var(--card);
+            padding: 20px; border-radius: 30px;
+            box-shadow: var(--shadow);
+            width: 100%; max-width: 350px;
+            aspect-ratio: 1;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-/* ---------- MAIN (FIXED) ---------- */
-.main{
-  height:calc(100% - 150px - 84px); /* top-bar + bottom-bar */
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+        /* ---------- BOTTOM BAR ---------- */
+        .bottom-bar {
+            height: 84px; position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; display: flex;
+            justify-content: space-around; align-items: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        }
 
-/* ---------- CHART FIX ---------- */
-.chart-wrapper{
-  width:300px;
-  height:300px;
-}
-
-canvas{
-  width:300px !important;
-  height:300px !important;
-}
-
-/* ---------- SIDEBAR ---------- */
-.sidebar{
-  position:fixed;
-  top:0;
-  left:-320px;
-  width:300px;
-  height:100%;
-  background:white;
-  box-shadow:4px 0 20px rgba(0,0,0,.2);
-  padding:20px;
-  transition:.25s ease;
-  z-index:20;
-}
-
-.sidebar.active{
-  left:0;
-}
-
-.sidebar-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:16px;
-}
-
-.close-btn{
-  font-size:22px;
-  cursor:pointer;
-}
-
-.axis-item{
-  display:flex;
-  gap:8px;
-  margin-bottom:10px;
-}
-
-.axis-item input{
-  flex:1;
-  padding:8px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-
-.axis-item button{
-  border:none;
-  background:#f44336;
-  color:white;
-  border-radius:10px;
-  padding:0 10px;
-}
-
-.add-axis{
-  display:flex;
-  gap:8px;
-  margin-top:12px;
-}
-
-.add-axis input{
-  flex:1;
-  padding:8px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-
-.add-axis button{
-  background:#4CAF50;
-  color:white;
-  border:none;
-  border-radius:10px;
-  padding:0 14px;
-}
-
-/* ---------- BOTTOM BAR ---------- */
-.bottom-bar{
-  height:84px;
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:rgba(255,255,255,0.95);
-  backdrop-filter:blur(10px);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  box-shadow:0 -6px 20px rgba(0,0,0,0.15);
-}
-
-.bottom-bar a{
-  color:#888;
-  font-size:22px;
-  text-decoration:none;
-}
-
-.bottom-bar a.active{
-  color:#4CAF50;
-}
-</style>
+        .bottom-bar a { color: #888; font-size: 22px; text-decoration: none; padding: 10px; }
+        .bottom-bar a.active { color: var(--primary); }
+    </style>
 </head>
-
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <h3>Configurar gráfico</h3>
-    <i class="fas fa-times close-btn" onclick="toggleSidebar()"></i>
-  </div>
-  <div id="axisList"></div>
-  <div class="add-axis">
-    <input id="newAxis" placeholder="Nueva característica">
-    <button onclick="addAxis()">+</button>
-  </div>
-</div>
-
-<!-- TOP BAR -->
 <div class="top-bar">
-  <i class="fas fa-bars menu-btn" onclick="toggleSidebar()"></i>
-  <div class="app-name">EvolvP</div>
-  <div class="date" id="date"></div>
-
-  <div class="stats">
-    <div class="stat"><i class="fas fa-fire"></i>7</div>
-    <div class="stat"><i class="fas fa-chart-line"></i>21</div>
-  </div>
+    <div class="header-actions">
+        <i class="fas fa-bars"></i>
+        <div class="app-name">EvolvP</div>
+        <i class="fas fa-user-circle"></i>
+    </div>
+    <div class="date-text" id="dateDisplay"></div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-fire"></i>
+            <span id="streakDisplay">0</span>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-check-circle"></i>
+            <span id="totalDoneDisplay">0</span>
+        </div>
+    </div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
-  <div class="chart-wrapper">
-    <canvas id="habitChart" width="300" height="300"></canvas>
-  </div>
+    <div class="chart-container">
+        <canvas id="habitChart"></canvas>
+    </div>
+    <p style="margin-top:15px; color:var(--text-muted); font-size:13px;">Progreso por Categoría (Hoy)</p>
 </div>
 
-<!-- BOTTOM BAR -->
 <div class="bottom-bar">
-  <a href="index.html" class="active"><i class="fas fa-house"></i></a>
-  <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
-  <a href="HabitoHN.html"><i class="fas fa-check"></i></a>
-  <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
-  <a href="AddH.html"><i class="fas fa-plus"></i></a>
-  <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
+    <a href="index.html" class="active"><i class="fas fa-house"></i></a>
+    <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
+    <a href="HabitoHN.html"><i class="fas fa-check"></i></a>
+    <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
+    <a href="AddH.html"><i class="fas fa-plus"></i></a>
+    <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
 </div>
 
 <script>
-document.getElementById("date").innerText =
-  new Date().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"short"});
+    // --- 1. GESTIÓN DE DATOS (LOCALSTORAGE) ---
+    // Esta función debe estar en todas tus páginas para leer la info compartida
+    function getAppData() {
+        const data = localStorage.getItem('evolvp_data');
+        if (!data) {
+            // Datos iniciales de ejemplo si la racha está vacía
+            return {
+                habitos: [
+                    { nombre: "Correr", categoria: "Ejercicio" },
+                    { nombre: "Meditar", categoria: "Salud" },
+                    { nombre: "Leer", categoria: "Estudio" }
+                ],
+                completados: {}, // Formato: {"2023-10-27": ["Correr", "Meditar"]}
+                config: { rachaMinima: 0.65 } 
+            };
+        }
+        return JSON.parse(data);
+    }
 
-function toggleSidebar(){
-  sidebar.classList.toggle("active");
-}
+    // --- 2. CÁLCULO DE RACHAS Y TOTALES ---
+    function calculateStats() {
+        const data = getAppData();
+        const hoy = new Date().toISOString().split('T')[0];
+        
+        // Días totales completados (Cualquier día que tenga algo marcado)
+        const totalDias = Object.keys(data.completados).length;
+        document.getElementById('totalDoneDisplay').innerText = totalDias;
 
-/* ---- CENTER DOT ---- */
-const centerDot={
-  id:'centerDot',
-  afterDraw(chart){
-    const ctx=chart.ctx;
-    const p=chart.scales.r.getPointPosition(0,0);
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,4,0,Math.PI*2);
-    ctx.fillStyle='#4CAF50';
-    ctx.fill();
-  }
-};
+        // Cálculo de Racha Consecutiva
+        let streak = 0;
+        let curr = new Date();
+        
+        while (true) {
+            const dateStr = curr.toISOString().split('T')[0];
+            const realizados = data.completados[dateStr] || [];
+            const totalHabitos = data.habitos.length;
+            
+            // Si el porcentaje del día es mayor al configurado (ej 65%)
+            if (totalHabitos > 0 && (realizados.length / totalHabitos) >= data.config.rachaMinima) {
+                streak++;
+                curr.setDate(curr.getDate() - 1);
+            } else {
+                // Si es hoy y aún no completamos, no rompemos racha todavía, pero paramos de contar hacia atrás
+                if (dateStr === hoy) {
+                    curr.setDate(curr.getDate() - 1);
+                    continue; 
+                }
+                break;
+            }
+        }
+        document.getElementById('streakDisplay').innerText = streak;
+    }
 
-let axes=["Salud","Ejercicio","Estudio","Sueño","Disciplina","Social"];
-let values=axes.map(()=>3);
+    // --- 3. GRÁFICO DE ARAÑA DINÁMICO ---
+    function renderChart() {
+        const data = getAppData();
+        const hoy = new Date().toISOString().split('T')[0];
+        const hechosHoy = data.completados[hoy] || [];
 
-/* ---- FIXED RADAR ---- */
-const chart=new Chart(habitChart,{
-  type:'radar',
-  plugins:[centerDot],
-  data:{
-    labels:axes,
-    datasets:[{
-      data:values,
-      backgroundColor:'rgba(76,175,80,.2)',
-      borderColor:'#4CAF50',
-      pointBackgroundColor:'#4CAF50'
-    }]
-  },
-  options:{
-    responsive:false,      // 🚫 NO resize
-    animation:false,       // 🚫 NO animation
-    plugins:{legend:{display:false}},
-    scales:{r:{min:0,max:5}}
-  }
-});
+        // Agrupar hábitos por categoría
+        const categorias = [...new Set(data.habitos.map(h => h.categoria))];
+        const valores = categorias.map(cat => {
+            const habitosDeCat = data.habitos.filter(h => h.categoria === cat);
+            const completadosDeCat = habitosDeCat.filter(h => hechosHoy.includes(h.nombre));
+            // Valor de 0 a 5 para el gráfico
+            return habitosDeCat.length > 0 ? (completadosDeCat.length / habitosDeCat.length) * 5 : 0;
+        });
 
-/* ---- CONFIG ---- */
-function renderAxes(){
-  axisList.innerHTML="";
-  axes.forEach((a,i)=>{
-    axisList.innerHTML+=`
-      <div class="axis-item">
-        <input value="${a}" oninput="editAxis(${i},this.value)">
-        <button onclick="removeAxis(${i})">✕</button>
-      </div>`;
-  });
-}
+        const ctx = document.getElementById('habitChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: categorias,
+                datasets: [{
+                    data: valores,
+                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                    borderColor: '#4CAF50',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#4CAF50'
+                }]
+            },
+            options: {
+                scales: { r: { min: 0, max: 5, ticks: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
 
-function editAxis(i,v){
-  axes[i]=v;
-  chart.data.labels=axes;
-  chart.update();
-}
-
-function addAxis(){
-  if(!newAxis.value) return;
-  axes.push(newAxis.value);
-  values.push(3);
-  newAxis.value="";
-  chart.data.labels=axes;
-  chart.data.datasets[0].data=values;
-  chart.update();
-  renderAxes();
-}
-
-function removeAxis(i){
-  axes.splice(i,1);
-  values.splice(i,1);
-  chart.data.labels=axes;
-  chart.data.datasets[0].data=values;
-  chart.update();
-  renderAxes();
-}
-
-renderAxes();
+    // Inicialización
+    window.onload = () => {
+        document.getElementById("dateDisplay").innerText = new Date().toLocaleDateString("es-ES", {weekday:"long", day:"numeric", month:"long"});
+        calculateStats();
+        renderChart();
+    };
 </script>
-
 </body>
 </html>
