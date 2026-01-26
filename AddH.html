@@ -227,7 +227,8 @@
             box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
             z-index: 90;
         }
-        .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; }
+        .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; transition: 0.2s; }
+        .bottom-bar a:active { transform: scale(0.9); }
         .bottom-bar a.active { color: var(--primary); }
     </style>
 </head>
@@ -339,12 +340,11 @@
 
     <!-- BARRA DE TAREAS -->
     <div class="bottom-bar">
-        <a href="#"><i class="fas fa-house"></i></a>
-        <a href="#"><i class="fas fa-calendar"></i></a>
-        <a href="#"><i class="fas fa-check"></i></a>
-        <a href="#"><i class="fas fa-lightbulb"></i></a>
-        <a href="#" class="active"><i class="fas fa-plus"></i></a>
-        <a href="#"><i class="fas fa-gear"></i></a>
+        <a href="index.html"><i class="fas fa-house"></i></a>
+        <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
+        <a href="AddH.html" class="active"><i class="fas fa-check"></i></a>
+        <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
+        <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
     </div>
 
     <script>
@@ -428,8 +428,6 @@
         function action_confirmDelete() {
             const mode = document.querySelector('input[name="dOpt"]:checked').value;
             if(mode === 'total' || mode === 'today+') {
-                // 'today+' se comporta como eliminación inmediata del registro por ahora, 
-                // pero podrías expandirlo para guardar logs históricos si fuera necesario.
                 habits = habits.filter(i => i.id !== activeId);
             } else {
                 const h = habits.find(i => i.id === activeId);
