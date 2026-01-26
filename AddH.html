@@ -338,13 +338,14 @@
         <button class="btn-confirm danger" onclick="action_confirmDelete()">Confirmar Eliminación</button>
     </div>
 
-    <!-- BARRA DE TAREAS -->
+    <!-- BARRA DE TAREAS (6 ITEMS) -->
     <div class="bottom-bar">
-        <a href="index.html"><i class="fas fa-house"></i></a>
-        <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
-        <a href="AddH.html" class="active"><i class="fas fa-check"></i></a>
-        <a href="Consejos.html"><i class="fas fa-lightbulb"></i></a>
-        <a href="Ajustes.html"><i class="fas fa-gear"></i></a>
+        <a href="index.html" title="Inicio"><i class="fas fa-house"></i></a>
+        <a href="Calendario.html" title="Calendario"><i class="fas fa-calendar"></i></a>
+        <a href="HabitosHN.html" title="Log de Hábitos"><i class="fas fa-check"></i></a>
+        <a href="Consejos.html" title="Consejos"><i class="fas fa-lightbulb"></i></a>
+        <a href="#" class="active" title="Añadir"><i class="fas fa-plus"></i></a>
+        <a href="Ajustes.html" title="Ajustes"><i class="fas fa-gear"></i></a>
     </div>
 
     <script>
@@ -417,6 +418,7 @@
 
         function action_confirmPause() {
             const h = habits.find(i => i.id === activeId);
+            if(!h) return;
             const mode = document.querySelector('input[name="pOpt"]:checked').value;
             h.status = 'Pausado';
             h.pauseData = { mode };
@@ -431,18 +433,22 @@
                 habits = habits.filter(i => i.id !== activeId);
             } else {
                 const h = habits.find(i => i.id === activeId);
-                h.status = 'Pre-eliminacion';
-                h.deletionDate = document.getElementById('dDate').value;
+                if(h) {
+                    h.status = 'Pre-eliminacion';
+                    h.deletionDate = document.getElementById('dDate').value;
+                }
             }
             save(); closeAllPanels();
         }
 
         function action_resume(id) {
             const h = habits.find(i => i.id === id);
-            h.status = 'Activo';
-            h.pauseData = null;
-            h.deletionDate = null;
-            save();
+            if(h) {
+                h.status = 'Activo';
+                h.pauseData = null;
+                h.deletionDate = null;
+                save();
+            }
         }
 
         function render() {
@@ -455,7 +461,6 @@
             list.innerHTML = habits.map(h => {
                 const isPreDel = h.status === 'Pre-eliminacion';
                 const isPaused = h.status === 'Pausado';
-                const isOff = h.status !== 'Activo';
 
                 return `
                 <div class="habit-card">
