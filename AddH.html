@@ -10,16 +10,26 @@
         :root {
             --primary: #4CAF50;
             --bg: #f8fafc;
+            --card-bg: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
-            --white: #ffffff;
             --shadow: 0 4px 12px rgba(0,0,0,0.08);
             --warning: #f59e0b;
             --danger: #ef4444;
             --slate: #475569;
+            --border: #f1f5f9;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --border: #3d3d3d;
+            --slate: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; transition: background 0.3s, color 0.3s; }
         
         body { 
             background: var(--bg); 
@@ -48,9 +58,8 @@
             padding-bottom: 110px;
         }
 
-        /* TARJETA DE HÁBITO */
         .habit-card {
-            background: var(--white);
+            background: var(--card-bg);
             border-radius: 24px;
             padding: 20px;
             margin-bottom: 16px;
@@ -71,17 +80,16 @@
             border-radius: 12px;
             text-transform: uppercase;
         }
-        .badge-cat { background: #f1f5f9; color: var(--slate); }
+        .badge-cat { background: var(--border); color: var(--slate); }
         .badge-activo { background: #dcfce7; color: var(--primary); }
         .badge-pausado { background: #fef3c7; color: var(--warning); }
-        .badge-preeliminacion { background: #fee2e2; color: var(--danger); }
 
         .date-info { font-size: 12px; color: var(--text-muted); margin-top: 5px; display: block; line-height: 1.4; }
 
         .button-grid {
             display: flex;
             gap: 10px;
-            border-top: 1px solid #f1f5f9;
+            border-top: 1px solid var(--border);
             padding-top: 15px;
         }
 
@@ -99,29 +107,21 @@
             transition: 0.2s;
         }
 
-        .btn-main { flex: 1; background: #f1f5f9; color: var(--text-main); }
+        .btn-main { flex: 1; background: var(--border); color: var(--text-main); }
         .btn-resume { flex: 1; background: var(--primary); color: white; }
-        .btn-undo { flex: 1; background: var(--slate); color: white; }
         .btn-delete { width: 46px; background: #fff1f2; color: var(--danger); border: 1px solid #fecaca; }
 
-        .btn:active { transform: scale(0.96); }
-
-        /* PANELES Y OVERLAY */
         .overlay {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: rgba(15, 23, 42, 0.6);
-            display: none;
-            z-index: 100;
+            display: none; z-index: 100;
             backdrop-filter: blur(4px);
         }
         .overlay.active { display: block; }
 
         .panel {
-            position: fixed;
-            bottom: -100%;
-            left: 0; right: 0;
-            background: white;
+            position: fixed; bottom: -100%; left: 0; right: 0;
+            background: var(--card-bg);
             border-radius: 32px 32px 0 0;
             padding: 30px 24px;
             transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
@@ -131,98 +131,51 @@
         }
         .panel.active { bottom: 0; }
 
-        .panel h3 { text-align: center; margin-bottom: 25px; color: var(--slate); font-size: 20px; }
+        .panel h3 { text-align: center; margin-bottom: 25px; color: var(--text-main); font-size: 20px; }
 
         .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 10px; color: var(--slate); }
+        label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); }
         
         input, select {
-            width: 100%;
-            padding: 15px;
-            border-radius: 14px;
-            border: 2px solid #f1f5f9;
-            background: #f8fafc;
-            font-size: 16px;
-            outline: none;
+            width: 100%; padding: 15px; border-radius: 14px;
+            border: 2px solid var(--border); background: var(--bg);
+            color: var(--text-main); font-size: 16px; outline: none;
         }
 
         .option-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: #f8fafc;
-            border: 2px solid #f1f5f9;
-            padding: 16px;
-            border-radius: 16px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.2s;
+            display: flex; align-items: center; gap: 15px;
+            background: var(--bg); border: 2px solid var(--border);
+            padding: 16px; border-radius: 16px; margin-bottom: 10px;
+            cursor: pointer; width: 100%;
         }
-
-        .option-item input[type="radio"] {
-            width: 20px; height: 20px;
-            accent-color: var(--primary);
-        }
-
-        .sub-input {
-            margin: -5px 0 15px 0;
-            padding: 15px;
-            background: #f1f5f9;
-            border-radius: 0 0 16px 16px;
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .sub-input.visible { display: flex; }
 
         .btn-confirm {
-            background: var(--primary);
-            color: white;
-            width: 100%;
-            padding: 18px;
-            border-radius: 18px;
-            border: none;
-            font-size: 16px;
-            font-weight: 800;
-            margin-top: 10px;
-            cursor: pointer;
+            background: var(--primary); color: white; width: 100%;
+            padding: 18px; border-radius: 18px; border: none;
+            font-size: 16px; font-weight: 800; cursor: pointer;
         }
-        .btn-confirm.danger { background: var(--danger); }
 
         .add-btn {
-            position: fixed;
-            right: 20px;
-            bottom: 100px;
-            width: 64px; height: 64px;
-            border-radius: 22px;
-            background: var(--primary);
-            color: white;
-            font-size: 26px;
-            display: flex; align-items: center; justify-content: center;
+            position: fixed; right: 20px; bottom: 100px;
+            width: 64px; height: 64px; border-radius: 22px;
+            background: var(--primary); color: white;
+            font-size: 26px; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
-            z-index: 90;
-            border: none;
+            z-index: 90; border: none;
         }
 
         .bottom-bar {
-            height: 80px;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: var(--white);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
-            z-index: 90;
+            height: 80px; position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--card-bg); display: flex;
+            justify-content: space-around; align-items: center;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05); z-index: 90;
         }
-        .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; transition: 0.2s; }
+        .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; }
         .bottom-bar a.active { color: var(--primary); }
     </style>
 </head>
 
 <body>
-
     <div class="top-bar">
         <h1>Centro de Hábitos</h1>
     </div>
@@ -244,86 +197,11 @@
         </div>
         <div class="form-group">
             <label>Categoría</label>
-            <select id="newCat">
-                <!-- Se llena dinámicamente desde el almacenamiento global -->
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Cuándo empezar</label>
-            <label class="option-item">
-                <input type="radio" name="nRange" value="today" checked onchange="ui_toggleCreate()">
-                <span>Desde hoy mismo</span>
-            </label>
-            <label class="option-item">
-                <input type="radio" name="nRange" value="specific" onchange="ui_toggleCreate()">
-                <span>Día específico</span>
-            </label>
-            <div id="nSpecificDate" class="sub-input"><input type="date" id="nStartDate"></div>
-            
-            <label class="option-item">
-                <input type="radio" name="nRange" value="range" onchange="ui_toggleCreate()">
-                <span>Rango de fechas</span>
-            </label>
-            <div id="nRangeDates" class="sub-input">
-                <input type="date" id="nRangeStart" placeholder="Inicio">
-                <input type="date" id="nRangeEnd" placeholder="Fin">
-            </div>
+            <select id="newCat"></select>
         </div>
         <button class="btn-confirm" onclick="action_save()">Crear Hábito</button>
     </div>
 
-    <!-- PANEL PAUSAR -->
-    <div class="panel" id="pausePanel">
-        <h3>Opciones de Pausa</h3>
-        <div class="form-group">
-            <label class="option-item">
-                <input type="radio" name="pOpt" value="today" checked onchange="ui_togglePause()">
-                <span>Pausar solo por hoy</span>
-            </label>
-            <label class="option-item">
-                <input type="radio" name="pOpt" value="specific" onchange="ui_togglePause()">
-                <span>Pausar un día específico</span>
-            </label>
-            <div id="pSpecificDate" class="sub-input"><input type="date" id="pDate1"></div>
-            
-            <label class="option-item">
-                <input type="radio" name="pOpt" value="range" onchange="ui_togglePause()">
-                <span>Pausar rango de fechas</span>
-            </label>
-            <div id="pRangeDates" class="sub-input">
-                <input type="date" id="pStart"><input type="date" id="pEnd">
-            </div>
-
-            <label class="option-item">
-                <input type="radio" name="pOpt" value="forever" onchange="ui_togglePause()">
-                <span>Pausa indefinida</span>
-            </label>
-        </div>
-        <button class="btn-confirm" onclick="action_confirmPause()">Aplicar Pausa</button>
-    </div>
-
-    <!-- PANEL ELIMINAR -->
-    <div class="panel" id="deletePanel">
-        <h3>Eliminar Registro</h3>
-        <div class="form-group">
-            <label class="option-item">
-                <input type="radio" name="dOpt" value="today+" checked onchange="ui_toggleDelete()">
-                <span>Eliminar desde hoy en adelante</span>
-            </label>
-            <label class="option-item">
-                <input type="radio" name="dOpt" value="total" onchange="ui_toggleDelete()">
-                <span>Eliminar rastro completo</span>
-            </label>
-            <label class="option-item">
-                <input type="radio" name="dOpt" value="program" onchange="ui_toggleDelete()">
-                <span>Programar eliminación</span>
-            </label>
-            <div id="dFutureDate" class="sub-input"><input type="date" id="dDate"></div>
-        </div>
-        <button class="btn-confirm danger" onclick="action_confirmDelete()">Confirmar Eliminación</button>
-    </div>
-
-    <!-- BARRA DE TAREAS -->
     <div class="bottom-bar">
         <a href="index.html"><i class="fas fa-house"></i></a>
         <a href="Calendario.html"><i class="fas fa-calendar"></i></a>
@@ -334,31 +212,27 @@
     </div>
 
     <script>
-        // --- CONEXIÓN COMPARTIDA ---
         const DB_KEY = 'evolvp_data';
+        const THEME_KEY = 'evolvp_theme';
         
         function getRawData() {
             let raw = localStorage.getItem(DB_KEY);
             const defaultCats = ["Salud", "Ejercicio", "Estudio", "Disciplina"];
             if (!raw) return { habitos: [], completados: {}, config: { rachaMinima: 0.65 }, categorias: defaultCats };
-            
             let data = JSON.parse(raw);
             if (!data.categorias) data.categorias = defaultCats;
             return data;
         }
 
         let appData = getRawData();
-        let activeId = null;
 
         function save() { 
             localStorage.setItem(DB_KEY, JSON.stringify(appData)); 
             render(); 
         }
 
-        // UI HELPERS
-        function openPanel(id, hId = null) {
-            activeId = hId;
-            if (id === 'createPanel') loadCategoriesIntoSelect();
+        function openPanel(id) {
+            loadCategoriesIntoSelect();
             document.getElementById('overlay').classList.add('active');
             document.getElementById(id).classList.add('active');
         }
@@ -370,86 +244,26 @@
 
         function loadCategoriesIntoSelect() {
             const select = document.getElementById('newCat');
-            const data = getRawData();
-            select.innerHTML = data.categorias.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            select.innerHTML = appData.categorias.map(cat => `<option value="${cat}">${cat}</option>`).join('');
         }
 
-        function ui_toggleCreate() {
-            const val = document.querySelector('input[name="nRange"]:checked').value;
-            document.getElementById('nSpecificDate').classList.toggle('visible', val === 'specific');
-            document.getElementById('nRangeDates').classList.toggle('visible', val === 'range');
-        }
-
-        function ui_togglePause() {
-            const val = document.querySelector('input[name="pOpt"]:checked').value;
-            document.getElementById('pSpecificDate').classList.toggle('visible', val === 'specific');
-            document.getElementById('pRangeDates').classList.toggle('visible', val === 'range');
-        }
-
-        function ui_toggleDelete() {
-            const val = document.querySelector('input[name="dOpt"]:checked').value;
-            document.getElementById('dFutureDate').classList.toggle('visible', val === 'program');
-        }
-
-        // ACTIONS
         function action_save() {
             const name = document.getElementById('newName').value;
             if(!name) return;
-
-            const mode = document.querySelector('input[name="nRange"]:checked').value;
-            let start = new Date().toISOString().split('T')[0];
-            let end = null;
-
-            if(mode === 'specific') start = document.getElementById('nStartDate').value;
-            if(mode === 'range') {
-                start = document.getElementById('nRangeStart').value;
-                end = document.getElementById('nRangeEnd').value;
-            }
-
             appData.habitos.push({
                 id: Date.now(),
                 nombre: name,
                 categoria: document.getElementById('newCat').value,
-                startDate: start,
-                endDate: end,
-                status: 'Activo',
-                pauseData: null
+                startDate: new Date().toISOString().split('T')[0],
+                status: 'Activo'
             });
             save(); closeAllPanels();
             document.getElementById('newName').value = '';
         }
 
-        function action_confirmPause() {
-            const h = appData.habitos.find(i => i.id === activeId);
-            if(!h) return;
-            const mode = document.querySelector('input[name="pOpt"]:checked').value;
-            h.status = 'Pausado';
-            h.pauseData = { mode };
-            if(mode === 'specific') h.pauseData.date = document.getElementById('pDate1').value;
-            if(mode === 'range') h.pauseData.range = [document.getElementById('pStart').value, document.getElementById('pEnd').value];
-            save(); closeAllPanels();
-        }
-
-        function action_confirmDelete() {
-            const mode = document.querySelector('input[name="dOpt"]:checked').value;
-            if(mode === 'total' || mode === 'today+') {
-                appData.habitos = appData.habitos.filter(i => i.id !== activeId);
-            } else {
-                const h = appData.habitos.find(i => i.id === activeId);
-                if(h) {
-                    h.status = 'Pre-eliminacion';
-                    h.deletionDate = document.getElementById('dDate').value;
-                }
-            }
-            save(); closeAllPanels();
-        }
-
-        function action_resume(id) {
-            const h = appData.habitos.find(i => i.id === id);
-            if(h) {
-                h.status = 'Activo';
-                h.pauseData = null;
-                h.deletionDate = null;
+        function deleteHabit(id) {
+            if(confirm("¿Eliminar este hábito?")) {
+                appData.habitos = appData.habitos.filter(h => h.id !== id);
                 save();
             }
         }
@@ -457,44 +271,30 @@
         function render() {
             const list = document.getElementById('habitList');
             if(appData.habitos.length === 0) {
-                list.innerHTML = `<p style="text-align:center; margin-top:50px; color:var(--text-muted)">No hay hábitos creados.</p>`;
+                list.innerHTML = `<p style="text-align:center; margin-top:50px; color:var(--text-muted)">No hay hábitos. ¡Pulsa + para crear uno!</p>`;
                 return;
             }
-
-            list.innerHTML = appData.habitos.map(h => {
-                const isPreDel = h.status === 'Pre-eliminacion';
-                const isPaused = h.status === 'Pausado';
-
-                return `
+            list.innerHTML = appData.habitos.map(h => `
                 <div class="habit-card">
                     <div class="habit-info">
                         <h3>${h.nombre}</h3>
                         <div class="meta-tags">
                             <span class="badge badge-cat">${h.categoria}</span>
-                            <span class="badge badge-${h.status.toLowerCase().replace('-','')}">${h.status}</span>
+                            <span class="badge badge-activo">${h.status}</span>
                         </div>
-                        <span class="date-info">
-                            <i class="far fa-clock"></i> Inicia: ${h.startDate} ${h.endDate ? ' | Fin: '+h.endDate : ''}
-                            ${h.deletionDate ? `<br><strong style="color:var(--danger)">Programado para borrar: ${h.deletionDate}</strong>` : ''}
-                        </span>
                     </div>
                     <div class="button-grid">
-                        ${isPreDel 
-                            ? `<button class="btn btn-undo" onclick="action_resume(${h.id})"><i class="fas fa-undo"></i> Arrepentirme</button>`
-                            : isPaused
-                                ? `<button class="btn btn-resume" onclick="action_resume(${h.id})"><i class="fas fa-play"></i> Reanudar</button>`
-                                : `<button class="btn btn-main" onclick="openPanel('pausePanel', ${h.id})"><i class="fas fa-pause"></i> Pausar</button>`
-                        }
-                        <button class="btn btn-delete" onclick="openPanel('deletePanel', ${h.id})"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-main"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn btn-delete" onclick="deleteHabit(${h.id})"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
-                `;
-            }).join('');
+            `).join('');
         }
 
         window.onload = () => {
+            const theme = localStorage.getItem(THEME_KEY);
+            if(theme === 'dark') document.body.setAttribute('data-theme', 'dark');
             appData = getRawData();
-            loadCategoriesIntoSelect();
             render();
         };
     </script>
