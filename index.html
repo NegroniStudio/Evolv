@@ -18,12 +18,23 @@
             --text-muted: #64748b;
             --shadow: 0 10px 25px rgba(0,0,0,0.1);
             --danger: #ef4444;
+            --panel-bg: white;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --panel-bg: #1e1e1e;
+            --shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
         * {
             margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s, color 0.3s;
         }
 
         body { 
@@ -51,14 +62,9 @@
         .header-actions { display: flex; justify-content: space-between; align-items: center; }
         .app-name { font-size: 24px; font-weight: 800; }
         .date-text { text-align: center; margin-top: 10px; font-size: 15px; opacity: 0.9; text-transform: capitalize; }
-        
         .menu-trigger { cursor: pointer; font-size: 20px; padding: 5px; }
 
-        .stats-grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 15px; margin-top: 20px;
-        }
-
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .stat-card {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
@@ -66,7 +72,6 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
-
         .stat-card i { font-size: 14px; margin-bottom: 2px; opacity: 0.8; }
         .stat-card span { font-weight: 800; font-size: 22px; }
         .stat-label { font-size: 9px; font-weight: 800; text-transform: uppercase; opacity: 0.7; }
@@ -89,8 +94,6 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        .empty-state { text-align: center; color: var(--text-muted); padding: 40px; }
-
         /* ---------- PANELS & OVERLAY ---------- */
         .overlay {
             position: fixed; inset: 0;
@@ -103,41 +106,39 @@
         .side-panel {
             position: fixed; top: 0; left: -100%;
             width: 85%; max-width: 320px; height: 100%;
-            background: white; z-index: 101;
+            background: var(--panel-bg); z-index: 101;
             transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 30px 20px;
             display: flex; flex-direction: column;
             border-radius: 0 30px 30px 0;
+            color: var(--text-main);
         }
         .side-panel.active { left: 0; }
 
-        .panel-title { font-size: 22px; font-weight: 800; margin-bottom: 25px; color: var(--text-main); }
-        
-        .cat-list { flex-grow: 1; overflow-y: auto; margin-bottom: 20px; }
         .cat-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 15px; background: #f8fafc; border-radius: 12px;
-            margin-bottom: 8px; border: 1px solid #f1f5f9;
+            padding: 12px 15px; background: rgba(0,0,0,0.03); border-radius: 12px;
+            margin-bottom: 8px; border: 1px solid rgba(0,0,0,0.05);
         }
-        .cat-item span { font-weight: 600; font-size: 14px; }
-        .btn-del-cat { color: var(--danger); cursor: pointer; padding: 5px; }
+        [data-theme="dark"] .cat-item { background: #2d2d2d; border-color: #3d3d3d; }
 
         /* ---------- BOTTOM BAR ---------- */
         .bottom-bar {
-            height: 84px; background: white; display: flex;
+            height: 80px; background: var(--card); display: flex;
             justify-content: space-around; align-items: center;
             box-shadow: 0 -5px 15px rgba(0,0,0,0.05); flex-shrink: 0;
             z-index: 10;
         }
-        .bottom-bar a { color: #cbd5e1; font-size: 22px; text-decoration: none; padding: 10px; transition: 0.2s; }
+        .bottom-bar a { color: var(--text-muted); font-size: 22px; text-decoration: none; padding: 10px; }
         .bottom-bar a.active { color: var(--primary); }
 
-        /* ---------- BARRA VERDE INFERIOR (NUEVA) ---------- */
+        /* BARRA VERDE INFERIOR MÁS GRANDE */
         .footer-accent {
-            height: 10px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            height: 35px;
+            background: linear-gradient(90deg, #4CAF50, #66bb6a);
             width: 100%;
             flex-shrink: 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -146,12 +147,12 @@
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <div class="side-panel" id="sidePanel">
-    <div class="panel-title">Categorías</div>
+    <div style="font-size: 22px; font-weight: 800; margin-bottom: 25px;">Categorías</div>
     <div class="cat-list" id="categoryList"></div>
-    <div class="p-4 bg-slate-50 rounded-xl mt-auto">
-        <p style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">Nueva Categoría</p>
+    <div style="padding: 15px; background: rgba(0,0,0,0.03); border-radius: 15px; margin-top: auto;">
+        <p style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Nueva Categoría</p>
         <div style="display: flex; gap: 8px;">
-            <input type="text" id="newCatInput" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; outline: none;" placeholder="Ejem: Trabajo">
+            <input type="text" id="newCatInput" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); font-size: 14px; outline: none; background: var(--card); color: var(--text-main);" placeholder="Ejem: Trabajo">
             <button onclick="addCategory()" style="background: #22c55e; color: white; padding: 0 12px; border-radius: 8px; font-weight: 800; border: none; cursor: pointer;">+</button>
         </div>
     </div>
@@ -182,7 +183,7 @@
     <div class="chart-container" id="chartWrapper">
         <canvas id="habitChart"></canvas>
     </div>
-    <div id="noDataMessage" class="empty-state" style="display: none;">
+    <div id="noDataMessage" style="display: none; text-align: center; color: var(--text-muted); padding: 40px;">
         <i class="fas fa-chart-pie" style="font-size: 40px; margin-bottom: 10px; opacity: 0.3;"></i>
         <p style="font-weight: 800; font-size: 14px;">Configura al menos 3 categorías con hábitos para ver tu radar de evolución.</p>
     </div>
@@ -202,6 +203,17 @@
 
 <script>
     const DB_KEY = 'evolvp_data';
+    const THEME_KEY = 'evolvp_theme';
+
+    function applyTheme() {
+        const theme = localStorage.getItem(THEME_KEY);
+        if(theme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        } else {
+            document.body.removeAttribute('data-theme');
+        }
+        if(window.myRadarChart) renderChart();
+    }
 
     function getAppData() {
         const data = localStorage.getItem(DB_KEY);
@@ -211,8 +223,7 @@
             config: { rachaMinima: 0.65 },
             categorias: ["Salud", "Ejercicio", "Estudio", "Disciplina"]
         };
-        if (!data) return defaults;
-        return JSON.parse(data);
+        return data ? JSON.parse(data) : defaults;
     }
 
     function saveAppData(data) {
@@ -231,7 +242,7 @@
         list.innerHTML = data.categorias.map(cat => `
             <div class="cat-item">
                 <span>${cat}</span>
-                <i class="fas fa-trash btn-del-cat" onclick="deleteCategory('${cat}')"></i>
+                <i class="fas fa-trash" style="color:var(--danger); cursor:pointer;" onclick="deleteCategory('${cat}')"></i>
             </div>
         `).join('');
     }
@@ -258,117 +269,79 @@
         const data = getAppData();
         const hoy = new Date().toISOString().split('T')[0];
         const minRatio = data.config?.rachaMinima || 0.65;
-        
         let diasGanadosTotales = 0;
         Object.keys(data.completados).forEach(dateKey => {
             const stats = getStatsForDate(data, dateKey);
-            if (stats.total > 0 && stats.ratio >= minRatio) {
-                diasGanadosTotales++;
-            }
+            if (stats.total > 0 && stats.ratio >= minRatio) diasGanadosTotales++;
         });
         document.getElementById('totalDoneDisplay').innerText = diasGanadosTotales;
-
         let streak = 0;
         let iterDate = new Date(); 
-        
         while (true) {
             const dateStr = iterDate.toISOString().split('T')[0];
             const stats = getStatsForDate(data, dateStr);
-
-            if (stats.total > 0 && stats.ratio >= minRatio) {
-                streak++;
-            } else {
-                if (dateStr !== hoy) {
-                    break;
-                }
-            }
+            if (stats.total > 0 && stats.ratio >= minRatio) { streak++; } 
+            else { if (dateStr !== hoy) break; }
             iterDate.setDate(iterDate.getDate() - 1);
             if (streak > 5000) break; 
         }
-        
         document.getElementById('streakDisplay').innerText = streak;
     }
 
     function getStatsForDate(data, dateKey) {
-        const activosEnEsaFecha = data.habitos.filter(h => {
-            const isStarted = dateKey >= h.startDate;
-            const isNotEnded = !h.endDate || dateKey <= h.endDate;
-            return isStarted && isNotEnded && h.status === 'Activo';
-        });
-
+        const activos = data.habitos.filter(h => dateKey >= h.startDate && (!h.endDate || dateKey <= h.endDate) && h.status === 'Activo');
         const logs = data.completados[dateKey] || {};
-        const hechos = activosEnEsaFecha.filter(h => logs[h.id]);
-        
-        return {
-            done: hechos.length,
-            total: activosEnEsaFecha.length,
-            ratio: activosEnEsaFecha.length > 0 ? (hechos.length / activosEnEsaFecha.length) : 0
-        };
+        const hechos = activos.filter(h => logs[h.id]);
+        return { total: activos.length, ratio: activos.length > 0 ? (hechos.length / activos.length) : 0 };
     }
 
     function renderChart() {
         const data = getAppData();
         const hoy = new Date().toISOString().split('T')[0];
         const logHoy = data.completados[hoy] || {};
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
 
-        const catsConHabitos = data.categorias.filter(cat => 
-            data.habitos.some(h => h.categoria === cat && h.status === 'Activo')
-        );
-
-        if (catsConHabitos.length < 3) {
+        const cats = data.categorias.filter(cat => data.habitos.some(h => h.categoria === cat && h.status === 'Activo'));
+        if (cats.length < 3) {
             document.getElementById('chartWrapper').style.display = 'none';
-            document.getElementById('chartLabel').style.display = 'none';
             document.getElementById('noDataMessage').style.display = 'block';
             return;
         }
 
         document.getElementById('chartWrapper').style.display = 'flex';
-        document.getElementById('chartLabel').style.display = 'block';
         document.getElementById('noDataMessage').style.display = 'none';
 
-        const valores = catsConHabitos.map(cat => {
+        const valores = cats.map(cat => {
             const deEstaCat = data.habitos.filter(h => h.categoria === cat && h.status === 'Activo');
-            const hechosDeEstaCat = deEstaCat.filter(h => logHoy[h.id]);
-            return deEstaCat.length > 0 ? (hechosDeEstaCat.length / deEstaCat.length) * 5 : 0;
+            const hechos = deEstaCat.filter(h => logHoy[h.id]);
+            return (hechos.length / deEstaCat.length) * 5;
         });
 
         const ctx = document.getElementById('habitChart').getContext('2d');
         if (window.myRadarChart) window.myRadarChart.destroy();
-
         window.myRadarChart = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: catsConHabitos,
+                labels: cats,
                 datasets: [{
-                    label: 'Nivel hoy',
                     data: valores,
                     backgroundColor: 'rgba(76, 175, 80, 0.25)',
                     borderColor: '#4CAF50',
                     borderWidth: 3,
-                    pointBackgroundColor: '#4CAF50',
-                    pointRadius: 4,
-                    lineTension: 0.2
+                    pointBackgroundColor: '#4CAF50'
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 scales: {
                     r: {
-                        min: 0, max: 5,
-                        beginAtZero: true,
-                        ticks: { display: false, stepSize: 1 },
-                        grid: { color: 'rgba(0,0,0,0.05)' },
-                        angleLines: { color: 'rgba(0,0,0,0.1)' },
-                        pointLabels: {
-                            font: { size: 11, weight: '800' },
-                            color: '#475569'
-                        }
+                        min: 0, max: 5, ticks: { display: false },
+                        grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' },
+                        angleLines: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
+                        pointLabels: { color: isDark ? '#94a3b8' : '#475569', font: { size: 11, weight: '800' } }
                     }
                 },
-                plugins: {
-                    legend: { display: false }
-                }
+                plugins: { legend: { display: false } }
             }
         });
     }
@@ -376,15 +349,15 @@
     function initApp() {
         const options = { weekday: 'long', day: 'numeric', month: 'long' };
         document.getElementById("dateDisplay").innerText = new Date().toLocaleDateString("es-ES", options);
+        applyTheme();
         renderCategories();
         calculateStats();
         renderChart();
     }
 
     window.onload = initApp;
-
     window.addEventListener('storage', (e) => {
-        if (e.key === DB_KEY) initApp();
+        if (e.key === DB_KEY || e.key === THEME_KEY) initApp();
     });
 </script>
 </body>
