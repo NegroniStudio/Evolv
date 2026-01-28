@@ -10,11 +10,11 @@
         :root {
             --bg-body: #f8fafc;
             --card-bg: white;
-            --text-main: #1e293b; /* slate-800 */
-            --text-sub: #94a3b8;  /* slate-400 */
+            --text-main: #1e293b;
+            --text-sub: #94a3b8;
             --border-color: #e2e8f0;
             --bottom-bar-bg: white;
-            --safe-area-bg: #4CAF50; /* Color verde para la franja inferior */
+            --safe-area-bg: #4CAF50;
         }
 
         [data-theme="dark"] {
@@ -24,7 +24,7 @@
             --text-sub: #64748b;
             --border-color: #334155;
             --bottom-bar-bg: #1e1e1e;
-            --safe-area-bg: #2e7d32; /* Verde más oscuro para modo oscuro */
+            --safe-area-bg: #2e7d32;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; transition: background 0.3s, border-color 0.3s; }
@@ -74,11 +74,9 @@
             color: #4CAF50; 
             font-weight: 800; 
             transform: scale(1.05); 
-            outline: 3px solid #000;
-            outline-offset: -2px;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.9);
         }
 
-        /* Ajuste de altura del contenido principal considerando las dos barras inferiores */
         .main-content {
             height: calc(100% - 120px - 70px - 25px);
             overflow-y: auto;
@@ -135,7 +133,6 @@
         }
         .check-circle.active { background: #4CAF50; border-color: #4CAF50; color: white; }
 
-        /* Contenedor de navegación inferior */
         .navigation-wrapper {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -152,7 +149,6 @@
             border-top: 1px solid var(--border-color);
         }
 
-        /* Barra verde para evitar interrupción de botones del sistema */
         .safe-area-bar {
             height: 25px;
             background: var(--safe-area-bg);
@@ -195,7 +191,6 @@
         <div id="habitList" class="pb-10"></div>
     </div>
 
-    <!-- Nueva estructura de barras inferiores -->
     <div class="navigation-wrapper">
         <div class="bottom-bar">
             <a href="index.html"><i class="fas fa-house"></i></a>
@@ -214,7 +209,8 @@
         const THEME_KEY = 'evolvp_theme';
         
         let appData = { habitos: [], completados: {}, config: { rachaMinima: 0.65 } };
-        let selectedDate = localStorage.getItem(SEL_KEY) || new Date().toISOString().split('T')[0];
+        // Asegurar que la fecha sea local y no UTC para evitar saltos de día
+        let selectedDate = localStorage.getItem(SEL_KEY) || new Date().toLocaleDateString('sv-SE'); 
         let currentWeekStart = new Date(selectedDate + 'T12:00:00');
 
         function applyTheme() {
@@ -231,6 +227,7 @@
             if (raw) {
                 appData = JSON.parse(raw);
                 if (!appData.completados) appData.completados = {};
+                if (!appData.habitos) appData.habitos = [];
             }
         }
 
@@ -240,7 +237,7 @@
 
         function setWeekToMonday(date) {
             const d = new Date(date);
-            const day = d.getDay();
+            const day = d.getDay(); // 0 (Dom) - 6 (Sab)
             const diff = d.getDate() - day + (day === 0 ? -6 : 1);
             d.setDate(diff);
             d.setHours(0,0,0,0);
@@ -269,12 +266,14 @@
             const daysRow = document.getElementById('daysRow');
             const monthText = document.getElementById('monthText');
             daysRow.innerHTML = '';
+            
+            // Texto del mes basado en el lunes de la semana actual
             monthText.innerText = currentWeekStart.toLocaleDateString('es-ES', { month: 'long' });
 
             for(let i=0; i<7; i++) {
                 const d = new Date(currentWeekStart);
                 d.setDate(currentWeekStart.getDate() + i);
-                const dKey = d.toISOString().split('T')[0];
+                const dKey = d.toLocaleDateString('sv-SE');
                 const isSelected = dKey === selectedDate;
 
                 const dayItem = document.createElement('div');
@@ -298,14 +297,30 @@
             const dayLog = appData.completados[selectedDate] || {};
             list.innerHTML = '';
 
+            // 1. Obtener el día de la semana de la fecha seleccionada (1-7, Lunes a Domingo)
+            const selDateObj = new Date(selectedDate + 'T12:00:00');
+            let dayOfWeek = selDateObj.getDay(); 
+            dayOfWeek = (dayOfWeek === 0) ? 7 : dayOfWeek; // Ajustar para que Lunes=1, Domingo=7
+
+            // 2. Filtrar hábitos según fecha de vigencia Y días de la semana programados
             const activeHabits = habits.filter(h => {
+                // Filtro por estatus y rango de fechas
                 const isStarted = selectedDate >= h.startDate;
                 const isNotEnded = !h.endDate || selectedDate <= h.endDate;
-                return isStarted && isNotEnded && h.status !== 'Pre-eliminacion';
+                const isNotDeleted = h.status !== 'Pre-eliminacion';
+                
+                // Filtro por día de la semana (si el hábito tiene 'diasSeleccionados')
+                // Se espera que h.diasSeleccionados sea un array tipo [1, 3, 5] (Lunes, Miércoles, Viernes)
+                let matchesDay = true;
+                if (h.diasSeleccionados && Array.isArray(h.diasSeleccionados)) {
+                    matchesDay = h.diasSeleccionados.includes(dayOfWeek);
+                }
+
+                return isStarted && isNotEnded && isNotDeleted && matchesDay;
             });
 
             if(activeHabits.length === 0) {
-                list.innerHTML = `<div class="text-center py-12 opacity-40"><p class="text-sm font-bold">No hay hábitos</p></div>`;
+                list.innerHTML = `<div class="text-center py-12 opacity-40"><p class="text-sm font-bold">No hay hábitos programados para hoy</p></div>`;
             } else {
                 activeHabits.forEach(h => {
                     const isDone = dayLog[h.id];
@@ -324,17 +339,29 @@
                     list.appendChild(item);
                 });
             }
-            const dObj = new Date(selectedDate + 'T12:00:00');
-            document.getElementById('dateLabel').innerText = dObj.toLocaleDateString('es-ES', { day:'numeric', month:'short' });
+            
+            document.getElementById('dateLabel').innerText = selDateObj.toLocaleDateString('es-ES', { day:'numeric', month:'short' });
         }
 
         function updateProgress() {
-            const habits = (appData.habitos || []).filter(h => h.status === 'Activo' && selectedDate >= h.startDate);
+            // Re-calcular los hábitos activos para el progreso del día seleccionado
+            const selDateObj = new Date(selectedDate + 'T12:00:00');
+            let dayOfWeek = selDateObj.getDay(); 
+            dayOfWeek = (dayOfWeek === 0) ? 7 : dayOfWeek;
+
+            const habitsForToday = (appData.habitos || []).filter(h => {
+                const isStarted = selectedDate >= h.startDate;
+                const matchesDay = h.diasSeleccionados ? h.diasSeleccionados.includes(dayOfWeek) : true;
+                return h.status === 'Activo' && isStarted && matchesDay;
+            });
+
             const dayLog = appData.completados[selectedDate] || {};
-            const done = habits.filter(h => dayLog[h.id]).length;
-            const perc = habits.length > 0 ? Math.round((done / habits.length) * 100) : 0;
+            const done = habitsForToday.filter(h => dayLog[h.id]).length;
+            const perc = habitsForToday.length > 0 ? Math.round((done / habitsForToday.length) * 100) : 0;
+            
             document.getElementById('percText').innerText = perc + '%';
             document.getElementById('circProgress').style.setProperty('--p', (perc * 3.6) + 'deg');
+            
             const target = (appData.config?.rachaMinima * 100) || 65;
             document.getElementById('statusMsg').innerText = perc >= target ? "Meta lograda" : `Objetivo ${target}%`;
         }
@@ -342,11 +369,14 @@
         window.onload = () => {
             applyTheme();
             loadData();
+            
+            // Sincronizar fecha seleccionada
             const syncDate = localStorage.getItem(SEL_KEY);
             if(syncDate) {
                 selectedDate = syncDate;
                 currentWeekStart = setWeekToMonday(new Date(selectedDate + 'T12:00:00'));
             }
+            
             render();
         };
     </script>
