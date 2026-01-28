@@ -350,12 +350,20 @@
 
     <script>
         const DB_KEY = 'evolvp_habits_v3';
+        const DEFAULT_CATS = ["Salud", "Ejercicio", "Estudio", "Disciplina"];
         
+        // Cargar datos y sincronizar categorías
         function getRawData() {
             let raw = localStorage.getItem(DB_KEY);
-            const defaultCats = ["Salud", "Ejercicio", "Estudio", "Disciplina"];
-            if (!raw) return { habitos: [], categorias: defaultCats };
-            return JSON.parse(raw);
+            let data;
+            if (!raw) {
+                data = { habitos: [], categorias: DEFAULT_CATS };
+            } else {
+                data = JSON.parse(raw);
+                // Asegurarse de que el campo categorias existe
+                if (!data.categorias) data.categorias = DEFAULT_CATS;
+            }
+            return data;
         }
 
         let appData = getRawData();
@@ -365,10 +373,28 @@
             render();
         }
 
+        // Lógica para cargar las categorías en los selectores cada vez que se abren los paneles
+        function loadCategoriesToSelects() {
+            // Refrescamos appData por si el index.html añadió categorías nuevas
+            appData = getRawData();
+            
+            const cats = appData.categorias || DEFAULT_CATS;
+            const html = cats.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            
+            const newCatSelect = document.getElementById('newCat');
+            const editCatSelect = document.getElementById('editCat');
+            
+            if(newCatSelect) newCatSelect.innerHTML = html;
+            if(editCatSelect) editCatSelect.innerHTML = html;
+        }
+
         function openPanel(id, extraId = null) {
-            loadCategories();
+            // IMPORTANTE: Antes de mostrar el panel, cargamos las categorías actuales
+            loadCategoriesToSelects();
+            
             document.getElementById('overlay').classList.add('active');
             document.getElementById(id).classList.add('active');
+            
             if(extraId) {
                 if(id === 'pausePanel') document.getElementById('pauseId').value = extraId;
                 if(id === 'deletePanel') document.getElementById('deleteId').value = extraId;
@@ -376,6 +402,7 @@
                     const h = appData.habitos.find(x => x.id == extraId);
                     document.getElementById('editId').value = extraId;
                     document.getElementById('editName').value = h.nombre;
+                    // Seleccionar la categoría del hábito en el select
                     document.getElementById('editCat').value = h.categoria;
                 }
             }
@@ -384,12 +411,6 @@
         function closeAllPanels() {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.getElementById('overlay').classList.remove('active');
-        }
-
-        function loadCategories() {
-            const html = appData.categorias.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-            document.getElementById('newCat').innerHTML = html;
-            document.getElementById('editCat').innerHTML = html;
         }
 
         function toggleCreateDates() {
@@ -587,6 +608,8 @@
 
         window.onload = () => {
             render();
+            // Cargar categorías iniciales
+            loadCategoriesToSelects();
         };
     </script>
 </body>
