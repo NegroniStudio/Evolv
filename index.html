@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvolvP - Inicio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body id="page-inicio">
+    <div class="container">
+        <div class="logo">EvolvP</div>
+
+        <div id="dashboard-date" style="text-align: center; margin-bottom: 2rem; opacity: 0.7; font-weight: 600;">
+            <!-- Fechas inyectadas por JS -->
+        </div>
+
+        <div class="card streak-card fade-in"
+            style="padding: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+            <div style="text-align: left;">
+                <h3 style="opacity: 0.9; margin-bottom: 0;">Racha Actual</h3>
+                <div class="streak-value" id="current-streak" style="font-size: 3.5rem; margin: 0;">0</div>
+                <p style="font-size: 0.8rem; opacity: 0.8;">Días consecutivos</p>
+            </div>
+            <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 1.5rem;">
+                <h3 style="opacity: 0.9; margin-bottom: 0;">Total</h3>
+                <div class="streak-value" id="total-achieved" style="font-size: 3.5rem; margin: 0;">0</div>
+                <p style="font-size: 0.8rem; opacity: 0.8;">Días logrados</p>
+            </div>
+        </div>
+
+        <div class="card glass fade-in" style="animation-delay: 0.1s;">
+            <h3
+                style="margin-bottom: 1.5rem; opacity: 0.6; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">
+                Balance de Vida</h3>
+            <div style="height: 250px;">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card glass fade-in" style="animation-delay: 0.2s;">
+            <h3
+                style="margin-bottom: 1.5rem; opacity: 0.6; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">
+                Hábitos de Hoy</h3>
+            <div id="daily-habits-list">
+                <!-- Inyectado por JS -->
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <i class="fa-solid fa-house"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="habitos.html" class="nav-item">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Hábitos</span>
+        </a>
+        <a href="calendario.html" class="nav-item">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Calendario</span>
+        </a>
+        <a href="notas.html" class="nav-item">
+            <i class="fa-solid fa-note-sticky"></i>
+            <span>Notas</span>
+        </a>
+        <a href="consejos.html" class="nav-item">
+            <i class="fa-solid fa-lightbulb"></i>
+            <span>Consejos</span>
+        </a>
+        <a href="ajustes.html" class="nav-item">
+            <i class="fa-solid fa-gear"></i>
+            <span>Ajustes</span>
+        </a>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
